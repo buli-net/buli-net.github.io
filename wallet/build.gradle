@@ -3,6 +3,10 @@ plugins {
     id 'androidsvgdrawable'
 }
 
+repositories {
+    mavenLocal()
+}
+
 configurations {
     all*.exclude group: 'androidx.viewpager', module: 'viewpager'
     all*.exclude group: 'androidx.core', module: 'core-ktx'
@@ -22,7 +26,7 @@ dependencies {
     implementation 'androidx.sqlite:sqlite:2.3.0'
     implementation "androidx.room:room-runtime:2.5.0"
     annotationProcessor "androidx.room:room-compiler:2.5.0"
-    implementation 'org.bitcoinj:bitcoinj-core:0.16.2'
+    implementation 'org.bitcoinj:bitcoinj-core:0.17-SNAPSHOT'
     implementation 'com.google.guava:guava:31.1-android'
     implementation 'com.google.zxing:core:3.5.1'
     //noinspection GradleDependency
