@@ -46,7 +46,7 @@ import de.schildbach.wallet.addressbook.AddressBookEntry;
 import de.schildbach.wallet.util.Qr;
 import de.schildbach.wallet.util.Toast;
 import org.bitcoinj.base.Address;
-import org.bitcoinj.core.LegacyAddress;
+import org.bitcoinj.base.LegacyAddress;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.wallet.Wallet;
 import org.slf4j.Logger;
