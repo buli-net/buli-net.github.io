@@ -59,7 +59,7 @@ import de.schildbach.wallet.ui.scan.ScanActivity;
 import de.schildbach.wallet.util.MonetarySpannable;
 import de.schildbach.wallet.util.Toast;
 import org.bitcoinj.base.exceptions.AddressFormatException;
-import org.bitcoinj.core.DumpedPrivateKey;
+import org.bitcoinj.crypto.DumpedPrivateKey;
 import org.bitcoinj.crypto.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.EncodedPrivateKey;
