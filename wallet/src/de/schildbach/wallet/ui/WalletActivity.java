@@ -64,7 +64,7 @@ import de.schildbach.wallet.util.CrashReporter;
 import de.schildbach.wallet.util.Nfc;
 import de.schildbach.wallet.util.OnFirstPreDraw;
 import org.bitcoinj.base.ScriptType;
-import org.bitcoinj.core.PrefixedChecksummedBytes;
+import org.bitcoinj.crypto.EncodedPrivateKey;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.VerificationException;
 
@@ -95,7 +95,7 @@ public final class WalletActivity extends AbstractWalletActivity {
                     }
 
                     @Override
-                    protected void handlePrivateKey(final PrefixedChecksummedBytes key) {
+                    protected void handlePrivateKey(final EncodedPrivateKey key) {
                         if (Constants.ENABLE_SWEEP_WALLET)
                             SweepWalletActivity.start(WalletActivity.this, key);
                         else

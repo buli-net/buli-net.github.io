@@ -30,7 +30,7 @@ import org.bitcoinj.base.Address;
 import org.bitcoinj.base.exceptions.AddressFormatException;
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.base.LegacyAddress;
-import org.bitcoinj.core.PrefixedChecksummedBytes;
+import org.bitcoinj.crypto.EncodedPrivateKey;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.VerificationException;
@@ -139,7 +139,7 @@ public abstract class InputParser {
             }
         }
 
-        protected void handlePrivateKey(final PrefixedChecksummedBytes key) {
+        protected void handlePrivateKey(final EncodedPrivateKey key) {
             final Address address = LegacyAddress.fromKey(Constants.NETWORK_PARAMETERS,
                     ((DumpedPrivateKey) key).getKey());
 

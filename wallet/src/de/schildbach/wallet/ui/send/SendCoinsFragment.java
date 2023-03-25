@@ -95,7 +95,7 @@ import org.bitcoinj.base.Address;
 import org.bitcoinj.base.exceptions.AddressFormatException;
 import org.bitcoinj.base.Coin;
 import org.bitcoinj.core.InsufficientMoneyException;
-import org.bitcoinj.core.PrefixedChecksummedBytes;
+import org.bitcoinj.crypto.EncodedPrivateKey;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionConfidence;
 import org.bitcoinj.core.TransactionConfidence.ConfidenceType;
@@ -1094,7 +1094,7 @@ public final class SendCoinsFragment extends Fragment {
             }
 
             @Override
-            protected void handlePrivateKey(final PrefixedChecksummedBytes key) {
+            protected void handlePrivateKey(final EncodedPrivateKey key) {
                 throw new UnsupportedOperationException();
             }
 
