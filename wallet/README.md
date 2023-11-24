@@ -57,21 +57,21 @@ Finally, you can build Bitcoin Wallet and sign it with your development key. Aga
 use:
 
     # each time
-    gradle clean test :wallet:assembleDevDebug
+    gradle clean test :wallet:assembleTestnetDebug
 
-You'll find the signed APK under this path:
+You'll find the developer-signed APK under this path:
 
-    wallet/build/outputs/apk/dev/debug/bitcoin-wallet-dev-debug.apk
+    wallet/build/outputs/apk/bitcoin-wallet-testnet-debug.apk
 
 To install the app on your Android device, use:
 
-    gradle :wallet:installDevDebug
+    gradle :wallet:installTestnetDebug
 
 If installation fails, make sure "Developer options" and "USB debugging" are enabled on your Android device, and an ADB
 connection is established.
 
 
-### BUILDING THE PRODUCTIVE VERSION
+### BUILDING THE MAINNET VERSION
 
 At this point I'd like to remind that you continue on your own risk. According to the license,
 there is basically no warranty and liability. It's your responsibility to audit the source code
@@ -83,11 +83,11 @@ tag) as the development version. After you have cloned/updated the git repositor
 use:
 
     # each time
-    gradle clean test :wallet:assembleProdRelease
+    gradle clean test :wallet:assembleMainnetRelease
 
 You'll find the unsigned APK under this path:
 
-    wallet/build/outputs/apk/prod/release/bitcoin-wallet-prod-release-unsigned.apk
+    wallet/build/outputs/apk/bitcoin-wallet-mainnet-release.apk
 
 Apart from the missing signature and checksums in `META-INF/`, it should be identical to the APKs
 provided via the app stores.

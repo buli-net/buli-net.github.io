@@ -56,4 +56,4 @@ RUN --mount=target=/home/builder/android-sdk,type=cache,uid=1000,gid=1000,sharin
 
 # export build output
 FROM scratch AS export-stage
-COPY --from=build-stage /home/builder/project/wallet/build/outputs/apk/*/release/bitcoin-wallet-*-release-unsigned.apk /
+COPY --from=build-stage /home/builder/project/wallet/build/outputs/apk/bitcoin-wallet-*-release.apk /

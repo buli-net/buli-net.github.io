@@ -39,10 +39,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
 
-ext {
-    archivesBaseName = 'bitcoin-wallet'
-}
-
 android {
     compileSdkVersion 'android-34'
     buildToolsVersion '35.0.0'
@@ -65,26 +61,26 @@ android {
 
     flavorDimensions 'flavor'
     productFlavors {
-        dev {
+        Testnet { // capital T because testnet flavor not allowed
             dimension 'flavor'
             applicationIdSuffix '.wallet_test'
         }
-        prod {
+        Mainnet {
             dimension 'flavor'
             applicationIdSuffix '.wallet'
         }
     }
 
     sourceSets {
-        main {
+        main { // configured for testnet by default
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
-        prod {
-            res.srcDirs = ['res-prod']
-            assets.srcDirs = ['assets-prod']
+        Mainnet {
+            res.srcDirs = ['res-mainnet']
+            assets.srcDirs = ['assets-mainnet']
         }
         test {
             java.srcDirs = ['test']
@@ -121,6 +117,15 @@ android {
         exclude 'org/bitcoinj/crypto/mnemonic/wordlist/english.txt'
         exclude 'org/bitcoinj/crypto/cacerts'
         exclude 'org.bitcoin.*.checkpoints.txt'
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "../../" + // all outputs go to build/outputs/apk
+                    "bitcoin-wallet-" +
+                    "${variant.flavorName.toLowerCase()}-" +
+                    "${variant.buildType.name}.apk"
+        }
     }
 }
 
