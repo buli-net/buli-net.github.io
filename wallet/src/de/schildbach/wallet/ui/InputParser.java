@@ -25,12 +25,12 @@ import de.schildbach.wallet.Constants;
 import de.schildbach.wallet.R;
 import de.schildbach.wallet.data.PaymentIntent;
 import de.schildbach.wallet.util.Qr;
-import org.bitcoin.protocols.payments.Protos;
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.core.DumpedPrivateKey;
-import org.bitcoinj.core.LegacyAddress;
-import org.bitcoinj.core.PrefixedChecksummedBytes;
+import org.bitcoinj.protobuf.payments.Protos;
+import org.bitcoinj.base.Address;
+import org.bitcoinj.base.exceptions.AddressFormatException;
+import org.bitcoinj.crypto.DumpedPrivateKey;
+import org.bitcoinj.base.LegacyAddress;
+import org.bitcoinj.crypto.EncodedPrivateKey;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.VerificationException;
@@ -49,6 +49,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.ArrayList;
@@ -103,8 +104,7 @@ public abstract class InputParser {
                 }
             } else if (PATTERN_TRANSACTION_BASE43.matcher(input).matches()) {
                 try {
-                    final Transaction tx = new Transaction(Constants.NETWORK_PARAMETERS,
-                            Qr.decodeDecompressBinary(input));
+                    final Transaction tx = Transaction.read(ByteBuffer.wrap(Qr.decodeDecompressBinary(input)));
                     handleDirectTransaction(tx);
                 } catch (final IOException | ProtocolException x) {
                     log.info("got invalid transaction", x);
@@ -112,7 +112,7 @@ public abstract class InputParser {
                 }
             } else if (PATTERN_TRANSACTION_HEX.matcher(input).matches()) {
                 try {
-                    final Transaction tx = new Transaction(Constants.NETWORK_PARAMETERS, Constants.HEX.decode(input));
+                    final Transaction tx = Transaction.read(ByteBuffer.wrap(Constants.HEX.decode(input)));
                     handleDirectTransaction(tx);
                 } catch (final IllegalArgumentException | ProtocolException x) {
                     log.info("got invalid transaction", x);
@@ -139,7 +139,7 @@ public abstract class InputParser {
             }
         }
 
-        protected void handlePrivateKey(final PrefixedChecksummedBytes key) {
+        protected void handlePrivateKey(final EncodedPrivateKey key) {
             final Address address = LegacyAddress.fromKey(Constants.NETWORK_PARAMETERS,
                     ((DumpedPrivateKey) key).getKey());
 
@@ -160,7 +160,7 @@ public abstract class InputParser {
         public void parse() {
             if (Constants.MIMETYPE_TRANSACTION.equals(inputType)) {
                 try {
-                    final Transaction tx = new Transaction(Constants.NETWORK_PARAMETERS, input);
+                    final Transaction tx = Transaction.read(ByteBuffer.wrap(input));
 
                     handleDirectTransaction(tx);
                 } catch (final VerificationException x) {

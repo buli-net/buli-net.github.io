@@ -20,13 +20,13 @@ package de.schildbach.wallet.ui.send;
 import android.os.Handler;
 import android.os.Looper;
 import de.schildbach.wallet.Constants;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.ECKey;
+import org.bitcoinj.base.Coin;
+import org.bitcoinj.crypto.ECKey;
 import org.bitcoinj.core.InsufficientMoneyException;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.Wallet;
-import org.bitcoinj.wallet.Wallet.CompletionException;
+import org.bitcoinj.wallet.Wallet.TransactionCompletionException;
 import org.bitcoinj.wallet.Wallet.CouldNotAdjustDownwards;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +83,7 @@ public abstract class SendCoinsOfflineTask {
                 log.info("send failed, could not adjust downwards: {}", x.getMessage());
 
                 callbackHandler.post(() -> onEmptyWalletFailed(x));
-            } catch (final CompletionException x) {
+            } catch (final TransactionCompletionException x) {
                 log.info("send failed, cannot complete: {}", x.getMessage());
 
                 callbackHandler.post(() -> onFailure(x));

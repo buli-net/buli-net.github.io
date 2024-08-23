@@ -48,7 +48,7 @@ import de.schildbach.wallet.util.WalletUtils;
 import org.bitcoinj.crypto.KeyCrypter;
 import org.bitcoinj.crypto.KeyCrypterScrypt;
 import org.bitcoinj.wallet.Wallet;
-import org.bouncycastle.crypto.params.KeyParameter;
+import org.bitcoinj.crypto.AesKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -228,12 +228,12 @@ public class EncryptKeysDialogFragment extends DialogFragment {
             // For the old key, we use the key crypter that was used to derive the password in the first
             // place.
             final KeyCrypter oldKeyCrypter = wallet.getKeyCrypter();
-            final KeyParameter oldKey = oldKeyCrypter != null && oldPassword != null ?
+            final AesKey oldKey = oldKeyCrypter != null && oldPassword != null ?
                     oldKeyCrypter.deriveKey(oldPassword) : null;
 
             // For the new key, we create a new key crypter according to the desired parameters.
             final KeyCrypterScrypt keyCrypter = new KeyCrypterScrypt(application.scryptIterationsTarget());
-            final KeyParameter newKey = newPassword != null ? keyCrypter.deriveKey(newPassword) : null;
+            final AesKey newKey = newPassword != null ? keyCrypter.deriveKey(newPassword) : null;
 
             handler.post(() -> {
                 // Decrypt from old password
