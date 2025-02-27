@@ -20,7 +20,6 @@ package wallet.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,6 +42,9 @@ import wallet.service.BlockchainState;
 import wallet.ui.send.FeeCategory;
 import wallet.ui.send.SendCoinsActivity;
 
+import java.time.Duration;
+import java.time.Instant;
+
 public final class WalletBalanceFragment extends Fragment {
     private WalletActivity activity;
     private WalletApplication application;
@@ -56,7 +58,7 @@ public final class WalletBalanceFragment extends Fragment {
     private WalletActivityViewModel activityViewModel;
     private WalletBalanceViewModel viewModel;
 
-    private static final long BLOCKCHAIN_UPTODATE_THRESHOLD_MS = DateUtils.HOUR_IN_MILLIS;
+    private static final Duration BLOCKCHAIN_UPTODATE_THRESHOLD = Duration.ofHours(1);
 
     @Override
     public void onAttach(final Context context) {
@@ -150,9 +152,9 @@ public final class WalletBalanceFragment extends Fragment {
 
         final boolean showProgress;
 
-        if (blockchainState != null && blockchainState.bestChainDate != null) {
-            final long blockchainLag = System.currentTimeMillis() - blockchainState.bestChainDate.getTime();
-            final boolean blockchainUptodate = blockchainLag < BLOCKCHAIN_UPTODATE_THRESHOLD_MS;
+        if (blockchainState != null && blockchainState.bestChainTime != null) {
+            final Duration blockchainLag = Duration.between(blockchainState.bestChainTime, Instant.now());
+            final boolean blockchainUptodate = blockchainLag.compareTo(BLOCKCHAIN_UPTODATE_THRESHOLD) < 0;
             final boolean noImpediments = blockchainState.impediments.isEmpty();
 
             showProgress = !(blockchainUptodate || !blockchainState.replaying);
@@ -160,17 +162,17 @@ public final class WalletBalanceFragment extends Fragment {
             final String downloading = getString(noImpediments ? R.string.blockchain_state_progress_downloading
                     : R.string.blockchain_state_progress_stalled);
 
-            if (blockchainLag < 2 * DateUtils.DAY_IN_MILLIS) {
-                final long hours = blockchainLag / DateUtils.HOUR_IN_MILLIS;
+            if (blockchainLag.compareTo(Duration.ofDays(2)) < 0) {
+                final long hours = blockchainLag.toHours();
                 viewProgress.setText(getString(R.string.blockchain_state_progress_hours, downloading, hours));
-            } else if (blockchainLag < 2 * DateUtils.WEEK_IN_MILLIS) {
-                final long days = blockchainLag / DateUtils.DAY_IN_MILLIS;
+            } else if (blockchainLag.compareTo(Duration.ofDays(2 * 7)) < 0) {
+                final long days = blockchainLag.toDays();
                 viewProgress.setText(getString(R.string.blockchain_state_progress_days, downloading, days));
-            } else if (blockchainLag < 90 * DateUtils.DAY_IN_MILLIS) {
-                final long weeks = blockchainLag / DateUtils.WEEK_IN_MILLIS;
+            } else if (blockchainLag.compareTo(Duration.ofDays(90)) < 0) {
+                final long weeks = blockchainLag.toDays() / 7;
                 viewProgress.setText(getString(R.string.blockchain_state_progress_weeks, downloading, weeks));
             } else {
-                final long months = blockchainLag / (30 * DateUtils.DAY_IN_MILLIS);
+                final long months = blockchainLag.toDays() / 30;
                 viewProgress.setText(getString(R.string.blockchain_state_progress_months, downloading, months));
             }
         } else {

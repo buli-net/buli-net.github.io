@@ -34,7 +34,9 @@ import wallet.WalletApplication;
 import wallet.service.BlockchainService;
 import wallet.ui.DialogBuilder;
 
+import java.time.Instant;
 import java.util.Locale;
+import java.util.Optional;
 
 public final class DiagnosticsFragment extends PreferenceFragment {
     private Activity activity;
@@ -94,9 +96,12 @@ public final class DiagnosticsFragment extends PreferenceFragment {
         final DeterministicKeyChain activeKeyChain = application.getWallet().getActiveKeyChain();
         final DeterministicKey extendedKey = activeKeyChain.getWatchingKey();
         final ScriptType outputScriptType = activeKeyChain.getOutputScriptType();
-        final long creationTimeSeconds = extendedKey.getCreationTimeSeconds();
-        final String base58 = String.format(Locale.US, "%s?c=%d&h=bip32",
-                extendedKey.serializePubB58(Constants.NETWORK_PARAMETERS, outputScriptType), creationTimeSeconds);
+        final String extendedKeyBase58 = extendedKey.serializePubB58(Constants.NETWORK_PARAMETERS.network(),
+                outputScriptType);
+        final Optional<Instant> creationTime = extendedKey.getCreationTime();
+        final String base58 = creationTime.isPresent() ?
+                String.format(Locale.US, "%s?c=%d&h=bip32", extendedKeyBase58, creationTime.get().getEpochSecond()) :
+                String.format(Locale.US, "%s?h=bip32", extendedKeyBase58);
         ExtendedPublicKeyFragment.show(getFragmentManager(), (CharSequence) base58);
     }
 }

@@ -28,7 +28,7 @@ import org.bitcoinj.base.Coin;
 import org.bitcoinj.base.utils.Fiat;
 import org.bitcoinj.utils.ExchangeRate;
 
-import java.util.Date;
+import java.time.Instant;
 
 @Entity(tableName = ExchangeRateEntry.TABLE_NAME, indices = { @Index(value = { "source", "currency_code" },
         unique = true) })
@@ -49,8 +49,8 @@ public final class ExchangeRateEntry {
 
     @NonNull
     @ColumnInfo(name = "rate_timestamp")
-    @TypeConverters({ DateConverters.class })
-    private Date rateTimeStamp;
+    @TypeConverters({ TimeConverters.class })
+    private Instant rateTimeStamp;
 
     @ColumnInfo(name = "rate_coin")
     private long rateCoin;
@@ -59,7 +59,7 @@ public final class ExchangeRateEntry {
     private long rateFiat;
 
     public ExchangeRateEntry(final long id, @NonNull final String source, @NonNull final String currencyCode,
-                             @NonNull final Date rateTimeStamp, final long rateCoin, final long rateFiat) {
+                             @NonNull final Instant rateTimeStamp, final long rateCoin, final long rateFiat) {
         this.id = id;
         this.source = source;
         this.currencyCode = currencyCode;
@@ -71,7 +71,7 @@ public final class ExchangeRateEntry {
     public ExchangeRateEntry(final String source, final ExchangeRate exchangeRate) {
         this.source = source;
         this.currencyCode = exchangeRate.fiat.currencyCode;
-        this.rateTimeStamp = new Date();
+        this.rateTimeStamp = Instant.now();
         this.rateCoin = exchangeRate.coin.value;
         this.rateFiat = exchangeRate.fiat.value;
     }
@@ -91,7 +91,7 @@ public final class ExchangeRateEntry {
     }
 
     @NonNull
-    public Date getRateTimeStamp() {
+    public Instant getRateTimeStamp() {
         return rateTimeStamp;
     }
 
@@ -130,15 +130,15 @@ public final class ExchangeRateEntry {
         return builder.toString();
     }
 
-    public static final class DateConverters {
+    public static final class TimeConverters {
         @TypeConverter
-        public static Date millisToDate(final long millis) {
-            return new Date(millis);
+        public static Instant millisToInstant(final long millis) {
+            return Instant.ofEpochMilli(millis);
         }
 
         @TypeConverter
-        public static long dateToMillis(final Date date) {
-            return date.getTime();
+        public static long instantToMillis(final Instant time) {
+            return time.toEpochMilli();
         }
     }
 }

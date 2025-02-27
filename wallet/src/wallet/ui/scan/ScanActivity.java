@@ -65,6 +65,7 @@ import wallet.ui.AbstractWalletActivity;
 import wallet.ui.DialogBuilder;
 import wallet.ui.Event;
 
+import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -87,8 +88,8 @@ public final class ScanActivity extends AbstractWalletActivity implements Surfac
         }
     }
 
-    private static final long VIBRATE_DURATION = 50L;
-    private static final long AUTO_FOCUS_INTERVAL_MS = 2500L;
+    private static final Duration VIBRATE_DURATION = Duration.ofMillis(50);
+    private static final Duration AUTO_FOCUS_INTERVAL = Duration.ofMillis(2500);
 
     private final CameraManager cameraManager = new CameraManager();
 
@@ -233,7 +234,7 @@ public final class ScanActivity extends AbstractWalletActivity implements Surfac
     }
 
     public void handleResult(final Result scanResult) {
-        vibrator.vibrate(VIBRATE_DURATION);
+        vibrator.vibrate(VIBRATE_DURATION.toMillis());
 
         scannerView.setIsResult(true);
 
@@ -318,7 +319,7 @@ public final class ScanActivity extends AbstractWalletActivity implements Surfac
             @Override
             public void onAutoFocus(final boolean success, final Camera camera) {
                 // schedule again
-                cameraHandler.postDelayed(AutoFocusRunnable.this, AUTO_FOCUS_INTERVAL_MS);
+                cameraHandler.postDelayed(AutoFocusRunnable.this, AUTO_FOCUS_INTERVAL.toMillis());
             }
         };
     }

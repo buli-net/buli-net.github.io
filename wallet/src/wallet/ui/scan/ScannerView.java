@@ -31,14 +31,16 @@ import android.view.View;
 import com.google.zxing.ResultPoint;
 import wallet.R;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 public class ScannerView extends View {
-    private static final long LASER_ANIMATION_DELAY_MS = 100l;
+    private static final Duration LASER_ANIMATION_DELAY = Duration.ofMillis(100);
     private static final int DOT_OPACITY = 0xa0;
-    private static final int DOT_TTL_MS = 500;
+    private static final Duration DOT_TTL = Duration.ofMillis(500);
 
     private final Paint maskPaint;
     private final Paint laserPaint;
@@ -47,7 +49,7 @@ public class ScannerView extends View {
     private final int maskColor, maskResultColor;
     private final int laserColor;
     private final int dotColor, dotResultColor;
-    private final Map<float[], Long> dots = new HashMap<>(16);
+    private final Map<float[], Instant> dots = new HashMap<>(16);
     private Rect frame;
     private final Matrix matrix = new Matrix();
 
@@ -93,7 +95,7 @@ public class ScannerView extends View {
     }
 
     public void addDot(final ResultPoint dot) {
-        dots.put(new float[] { dot.getX(), dot.getY() }, System.currentTimeMillis());
+        dots.put(new float[] { dot.getX(), dot.getY() }, Instant.now());
 
         invalidate();
     }
@@ -103,7 +105,7 @@ public class ScannerView extends View {
         if (frame == null)
             return;
 
-        final long now = System.currentTimeMillis();
+        final Instant now = Instant.now();
 
         final int width = getWidth();
         final int height = getHeight();
@@ -124,23 +126,24 @@ public class ScannerView extends View {
             dotPaint.setColor(dotResultColor);
         } else {
             laserPaint.setColor(laserColor);
-            final boolean laserPhase = (now / 600) % 2 == 0;
+            final boolean laserPhase = (now.toEpochMilli() / 600) % 2 == 0;
             laserPaint.setAlpha(laserPhase ? 160 : 255);
 
             dotPaint.setColor(dotColor);
 
             // schedule redraw
-            postInvalidateDelayed(LASER_ANIMATION_DELAY_MS);
+            postInvalidateDelayed(LASER_ANIMATION_DELAY.toMillis());
         }
 
         canvas.drawRect(frame, laserPaint);
 
         // draw points
-        for (final Iterator<Map.Entry<float[], Long>> i = dots.entrySet().iterator(); i.hasNext();) {
-            final Map.Entry<float[], Long> entry = i.next();
-            final long age = now - entry.getValue();
-            if (age < DOT_TTL_MS) {
-                dotPaint.setAlpha((int) ((DOT_TTL_MS - age) * 256 / DOT_TTL_MS));
+        final long dotTtlMs = DOT_TTL.toMillis();
+        for (final Iterator<Map.Entry<float[], Instant>> i = dots.entrySet().iterator(); i.hasNext();) {
+            final Map.Entry<float[], Instant> entry = i.next();
+            final long age = Duration.between(entry.getValue(), now).toMillis();
+            if (age < dotTtlMs) {
+                dotPaint.setAlpha((int) ((dotTtlMs - age) * 256 / dotTtlMs));
 
                 matrix.mapPoints(point, entry.getKey());
                 canvas.drawPoint(point[0], point[1], dotPaint);

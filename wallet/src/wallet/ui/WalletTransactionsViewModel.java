@@ -46,12 +46,14 @@ import wallet.data.AbstractWalletLiveData;
 import wallet.data.ConfigFormatLiveData;
 import wallet.data.WalletLiveData;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class WalletTransactionsViewModel extends AndroidViewModel {
@@ -130,10 +132,10 @@ public class WalletTransactionsViewModel extends AndroidViewModel {
         if (pending1 != pending2)
             return pending1 ? -1 : 1;
 
-        final Date updateTime1 = tx1.getUpdateTime();
-        final long time1 = updateTime1 != null ? updateTime1.getTime() : 0;
-        final Date updateTime2 = tx2.getUpdateTime();
-        final long time2 = updateTime2 != null ? updateTime2.getTime() : 0;
+        final Optional<Instant> updateTime1 = tx1.updateTime();
+        final long time1 = updateTime1.isPresent() ? updateTime1.get().toEpochMilli() : 0;
+        final Optional<Instant> updateTime2 = tx2.updateTime();
+        final long time2 = updateTime2.isPresent() ? updateTime2.get().toEpochMilli() : 0;
         if (time1 != time2)
             return time1 > time2 ? -1 : 1;
 
@@ -141,10 +143,10 @@ public class WalletTransactionsViewModel extends AndroidViewModel {
     };
 
     public static class TransactionsLiveData extends AbstractWalletLiveData<Set<Transaction>> {
-        private static final long THROTTLE_MS = 1000;
+        private static final Duration THROTTLE = Duration.ofSeconds(1);
 
         public TransactionsLiveData(final WalletApplication application) {
-            super(application, THROTTLE_MS);
+            super(application, THROTTLE);
         }
 
         @Override

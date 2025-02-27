@@ -17,7 +17,7 @@
 
 package wallet.service;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -26,14 +26,14 @@ public class BlockchainState {
         STORAGE, NETWORK
     }
 
-    public final Date bestChainDate;
+    public final Instant bestChainTime;
     public final int bestChainHeight;
     public final boolean replaying;
     public final EnumSet<Impediment> impediments;
 
-    public BlockchainState(final Date bestChainDate, final int bestChainHeight, final boolean replaying,
+    public BlockchainState(final Instant bestChainTime, final int bestChainHeight, final boolean replaying,
             final Set<Impediment> impediments) {
-        this.bestChainDate = bestChainDate;
+        this.bestChainTime = bestChainTime;
         this.bestChainHeight = bestChainHeight;
         this.replaying = replaying;
         this.impediments = EnumSet.copyOf(impediments);

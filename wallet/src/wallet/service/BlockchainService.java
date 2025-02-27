@@ -38,7 +38,6 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.Process;
-import android.text.format.DateUtils;
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -101,14 +100,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -145,7 +143,7 @@ public class BlockchainService extends LifecycleService {
     private final AtomicBoolean isBound = new AtomicBoolean(false);
 
     private static final int CONNECTIVITY_NOTIFICATION_PROGRESS_MIN_BLOCKS = 144 * 2; // approx. 2 days
-    private static final long BLOCKCHAIN_STATE_BROADCAST_THROTTLE_MS = DateUtils.SECOND_IN_MILLIS;
+    private static final Duration BLOCKCHAIN_STATE_BROADCAST_THROTTLE = Duration.ofSeconds(1);
 
     private static final String ACTION_CANCEL_COINS_RECEIVED = BlockchainService.class.getPackage().getName()
             + ".cancel_coins_received";
@@ -234,7 +232,7 @@ public class BlockchainService extends LifecycleService {
         summaryNotification.setGroup(Constants.NOTIFICATION_GROUP_KEY_RECEIVED);
         summaryNotification.setGroupSummary(true);
         summaryNotification.setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN);
-        summaryNotification.setWhen(System.currentTimeMillis());
+        summaryNotification.setWhen(Instant.now().toEpochMilli());
         summaryNotification.setSmallIcon(R.drawable.stat_notify_received_24dp);
         summaryNotification.setContentTitle(
                 getString(R.string.notification_coins_received_msg, btcFormat.format(notificationAccumulatedAmount))
@@ -259,7 +257,7 @@ public class BlockchainService extends LifecycleService {
                 Constants.NOTIFICATION_CHANNEL_ID_RECEIVED);
         childNotification.setGroup(Constants.NOTIFICATION_GROUP_KEY_RECEIVED);
         childNotification.setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN);
-        childNotification.setWhen(System.currentTimeMillis());
+        childNotification.setWhen(Instant.now().toEpochMilli());
         childNotification.setColor(getColor(R.color.fg_network_significant));
         childNotification.setSmallIcon(R.drawable.stat_notify_received_24dp);
         final String msg = getString(R.string.notification_coins_received_msg, btcFormat.format(amount)) + msgSuffix;
@@ -312,7 +310,7 @@ public class BlockchainService extends LifecycleService {
     private final BlockchainDownloadEventListener blockchainDownloadListener = new BlockchainDownloadListener();
 
     private class BlockchainDownloadListener implements BlockchainDownloadEventListener, Runnable {
-        private final AtomicLong lastMessageTime = new AtomicLong(0);
+        private final AtomicReference<Instant> lastMessageTime = new AtomicReference<>();
         private final AtomicInteger blocksToDownload = new AtomicInteger();
         private final AtomicInteger blocksLeft = new AtomicInteger();
 
@@ -332,16 +330,17 @@ public class BlockchainService extends LifecycleService {
             this.blocksLeft.set(blocksLeft);
 
             delayHandler.removeCallbacks(this);
-            final long now = System.currentTimeMillis();
-            if (now - lastMessageTime.get() > BLOCKCHAIN_STATE_BROADCAST_THROTTLE_MS)
+            final Instant now = Instant.now();
+            final Instant lastMessageTime = this.lastMessageTime.get();
+            if (lastMessageTime == null || Duration.between(lastMessageTime, now).compareTo(BLOCKCHAIN_STATE_BROADCAST_THROTTLE) > 0)
                 delayHandler.post(this);
             else
-                delayHandler.postDelayed(this, BLOCKCHAIN_STATE_BROADCAST_THROTTLE_MS);
+                delayHandler.postDelayed(this, BLOCKCHAIN_STATE_BROADCAST_THROTTLE.toMillis());
         }
 
         @Override
         public void run() {
-            lastMessageTime.set(System.currentTimeMillis());
+            lastMessageTime.set(Instant.now());
 
             postDelayedStopSelf(Constants.SERVICE_STOP_DELAY_AFTER_EVENT);
             final int blocksToDownload = this.blocksToDownload.get();
@@ -500,7 +499,7 @@ public class BlockchainService extends LifecycleService {
                 R.string.notification_connectivity_syncing_message));
         connectivityNotification.setContentIntent(PendingIntent.getActivity(BlockchainService.this, 0,
                 new Intent(BlockchainService.this, WalletActivity.class), PendingIntent.FLAG_IMMUTABLE));
-        connectivityNotification.setWhen(System.currentTimeMillis());
+        connectivityNotification.setWhen(Instant.now().toEpochMilli());
         connectivityNotification.setOngoing(true);
         connectivityNotification.setPriority(NotificationCompat.PRIORITY_LOW);
         startForeground(0);
@@ -550,18 +549,18 @@ public class BlockchainService extends LifecycleService {
                             Constants.Files.BLOCKCHAIN_STORE_CAPACITY, true);
                     blockStore.getChainHead(); // detect corruptions as early as possible
 
-                    final long earliestKeyCreationTimeSecs = wallet.getEarliestKeyCreationTime();
+                    final Instant earliestKeyCreationTime = wallet.earliestKeyCreationTime();
 
-                    if (!blockChainFileExists && earliestKeyCreationTimeSecs > 0) {
+                    if (!blockChainFileExists && earliestKeyCreationTime.toEpochMilli() > 0) {
                         try {
                             log.info("loading checkpoints for birthdate {} from '{}'",
-                                    DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochSecond(earliestKeyCreationTimeSecs)),
+                                    DateTimeFormatter.ISO_INSTANT.format(earliestKeyCreationTime),
                                     Constants.Files.CHECKPOINTS_ASSET);
                             final Stopwatch watch = Stopwatch.createStarted();
                             final InputStream checkpointsInputStream = getAssets()
                                     .open(Constants.Files.CHECKPOINTS_ASSET);
                             CheckpointManager.checkpoint(Constants.NETWORK_PARAMETERS, checkpointsInputStream,
-                                    blockStore, earliestKeyCreationTimeSecs);
+                                    blockStore, earliestKeyCreationTime);
                             watch.stop();
                             log.info("checkpoints loaded, took {}", watch);
                         } catch (final IOException x) {
@@ -641,8 +640,8 @@ public class BlockchainService extends LifecycleService {
                 final boolean trustedPeerOnly = config.isTrustedPeersOnly();
 
                 peerGroup.setMaxConnections(trustedPeerOnly ? 0 : maxConnectedPeers);
-                peerGroup.setConnectTimeoutMillis(Constants.PEER_TIMEOUT_MS);
-                peerGroup.setPeerDiscoveryTimeoutMillis(Constants.PEER_DISCOVERY_TIMEOUT_MS);
+                peerGroup.setConnectTimeout(Constants.PEER_TIMEOUT);
+                peerGroup.setPeerDiscoveryTimeout(Constants.PEER_DISCOVERY_TIMEOUT);
                 peerGroup.setStallThreshold(20, Block.HEADER_SIZE * 10);
 
                 final ResolveDnsTask resolveDnsTask = new ResolveDnsTask(backgroundHandler) {
@@ -810,11 +809,11 @@ public class BlockchainService extends LifecycleService {
             return null;
 
         final StoredBlock chainHead = blockChain.getChainHead();
-        final Date bestChainDate = chainHead.getHeader().getTime();
+        final Instant bestChainTime = chainHead.getHeader().time();
         final int bestChainHeight = chainHead.getHeight();
         final boolean replaying = chainHead.getHeight() < config.getBestChainHeightEver();
 
-        return new BlockchainState(bestChainDate, bestChainHeight, replaying, impediments.getValue());
+        return new BlockchainState(bestChainTime, bestChainHeight, replaying, impediments.getValue());
     }
 
     @Nullable

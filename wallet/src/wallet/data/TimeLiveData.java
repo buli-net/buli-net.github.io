@@ -24,9 +24,9 @@ import android.content.IntentFilter;
 import androidx.lifecycle.LiveData;
 import wallet.WalletApplication;
 
-import java.util.Date;
+import java.time.Instant;
 
-public class TimeLiveData extends LiveData<Date> {
+public class TimeLiveData extends LiveData<Instant> {
     private final WalletApplication application;
 
     public TimeLiveData(final WalletApplication application) {
@@ -36,7 +36,7 @@ public class TimeLiveData extends LiveData<Date> {
     @Override
     protected void onActive() {
         application.registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        setValue(new Date());
+        setValue(Instant.now());
     }
 
     @Override
@@ -47,7 +47,7 @@ public class TimeLiveData extends LiveData<Date> {
     private final BroadcastReceiver tickReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            setValue(new Date());
+            setValue(Instant.now());
         }
     };
 }

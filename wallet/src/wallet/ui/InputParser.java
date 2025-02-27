@@ -52,8 +52,8 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.regex.Pattern;
 
 public abstract class InputParser {
@@ -266,8 +266,8 @@ public abstract class InputParser {
             final PaymentSession paymentSession = PaymentProtocol.parsePaymentRequest(paymentRequest);
 
             if (paymentSession.isExpired())
-                throw new PaymentProtocolException.Expired("payment details expired: current time " + new Date()
-                        + " after expiry time " + paymentSession.getExpires());
+                throw new PaymentProtocolException.Expired("payment details expired: current time " + Instant.now()
+                        + " after expiry time " + paymentSession.expires());
 
             if (!paymentSession.getNetworkParameters().equals(Constants.NETWORK_PARAMETERS))
                 throw new PaymentProtocolException.InvalidNetwork(

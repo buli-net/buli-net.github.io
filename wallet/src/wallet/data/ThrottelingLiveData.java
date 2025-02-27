@@ -21,18 +21,21 @@ import android.os.Handler;
 import androidx.annotation.MainThread;
 import androidx.lifecycle.LiveData;
 
+import java.time.Duration;
+import java.time.Instant;
+
 public abstract class ThrottelingLiveData<T> extends LiveData<T> {
-    private final long throttleMs;
+    private final Duration throttle;
     private final Handler handler = new Handler();
-    private long lastMessageMs;
-    private static final long DEFAULT_THROTTLE_MS = 500;
+    private Instant lastMessageTime = null;
+    private static final Duration DEFAULT_THROTTLE = Duration.ofMillis(500);
 
     public ThrottelingLiveData() {
-        this(DEFAULT_THROTTLE_MS);
+        this(DEFAULT_THROTTLE);
     }
 
-    public ThrottelingLiveData(final long throttleMs) {
-        this.throttleMs = throttleMs;
+    public ThrottelingLiveData(final Duration throttle) {
+        this.throttle = throttle;
     }
 
     @Override
@@ -45,14 +48,18 @@ public abstract class ThrottelingLiveData<T> extends LiveData<T> {
     protected void triggerLoad() {
         handler.removeCallbacksAndMessages(null);
         final Runnable runnable = () -> {
-            lastMessageMs = System.currentTimeMillis();
+            lastMessageTime = Instant.now();
             load();
         };
-        final long lastMessageAgoMs = System.currentTimeMillis() - lastMessageMs;
-        if (lastMessageAgoMs < throttleMs)
-            handler.postDelayed(runnable, throttleMs - lastMessageAgoMs);
-        else
-            runnable.run(); // immediately
+        if (lastMessageTime == null) {
+            runnable.run(); // load immediately, because it's the first time
+        } else {
+            final Duration lastMessageAgo = Duration.between(lastMessageTime, Instant.now());
+            if (lastMessageAgo.compareTo(throttle) < 0)
+                handler.postDelayed(runnable, throttle.minus(lastMessageAgo).toMillis()); // throttled load
+            else
+                runnable.run(); // load immediately, because it's been a while
+        }
     }
 
     @MainThread

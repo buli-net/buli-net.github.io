@@ -25,12 +25,13 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.PowerManager;
-import android.text.format.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import wallet.Configuration;
 import wallet.Constants;
 import wallet.WalletApplication;
+
+import java.time.Duration;
 
 public class StartBlockchainService extends JobService {
     private PowerManager pm;
@@ -39,28 +40,28 @@ public class StartBlockchainService extends JobService {
 
     public static void schedule(final WalletApplication application, final boolean expectLargeData) {
         final Configuration config = application.getConfiguration();
-        final long lastUsedAgo = config.getLastUsedAgo();
+        final Duration lastUsedAgo = config.getLastUsedAgo();
 
         // apply some backoff
-        final long interval;
-        if (lastUsedAgo < Constants.LAST_USAGE_THRESHOLD_JUST_MS)
-            interval = DateUtils.MINUTE_IN_MILLIS * 15;
-        else if (lastUsedAgo < Constants.LAST_USAGE_THRESHOLD_TODAY_MS)
-            interval = DateUtils.HOUR_IN_MILLIS;
-        else if (lastUsedAgo < Constants.LAST_USAGE_THRESHOLD_RECENTLY_MS)
-            interval = DateUtils.DAY_IN_MILLIS / 2;
+        final Duration interval;
+        if (lastUsedAgo.compareTo(Constants.LAST_USAGE_THRESHOLD_JUST) < 0)
+            interval = Duration.ofMinutes(15);
+        else if (lastUsedAgo.compareTo(Constants.LAST_USAGE_THRESHOLD_TODAY) < 0)
+            interval = Duration.ofHours(1);
+        else if (lastUsedAgo.compareTo(Constants.LAST_USAGE_THRESHOLD_RECENTLY) < 0)
+            interval = Duration.ofHours(12);
         else
-            interval = DateUtils.DAY_IN_MILLIS;
+            interval = Duration.ofDays(1);
 
         log.info("last used {} minutes ago{}, rescheduling block chain sync in roughly {} minutes",
-                lastUsedAgo / DateUtils.MINUTE_IN_MILLIS, expectLargeData ? " and expecting large data" : "",
-                interval / DateUtils.MINUTE_IN_MILLIS);
+                lastUsedAgo.toMinutes(), expectLargeData ? " and expecting large data" : "",
+                interval.toMinutes());
 
         final JobScheduler jobScheduler = application.getSystemService(JobScheduler.class);
         final JobInfo.Builder jobInfo = new JobInfo.Builder(0, new ComponentName(application,
                 StartBlockchainService.class));
-        jobInfo.setMinimumLatency(interval);
-        jobInfo.setOverrideDeadline(DateUtils.WEEK_IN_MILLIS);
+        jobInfo.setMinimumLatency(interval.toMillis());
+        jobInfo.setOverrideDeadline(Duration.ofDays(7).toMillis());
         jobInfo.setRequiredNetworkType(expectLargeData ? JobInfo.NETWORK_TYPE_UNMETERED : JobInfo.NETWORK_TYPE_ANY);
         jobInfo.setRequiresDeviceIdle(true);
         jobInfo.setRequiresBatteryNotLow(true);

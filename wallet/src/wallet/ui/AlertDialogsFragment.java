@@ -38,6 +38,8 @@ import wallet.Constants;
 import wallet.R;
 import wallet.util.Installer;
 
+import java.time.Duration;
+
 public class AlertDialogsFragment extends Fragment {
     private static final String FRAGMENT_TAG = AlertDialogsFragment.class.getName();
 
@@ -75,11 +77,11 @@ public class AlertDialogsFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         viewModel = new ViewModelProvider(this).get(AlertDialogsViewModel.class);
-        viewModel.showTimeskewAlertDialog.observe(this, new Event.Observer<Long>() {
+        viewModel.showTimeskewAlertDialog.observe(this, new Event.Observer<Duration>() {
             @Override
-            protected void onEvent(final Long diffMinutes) {
+            protected void onEvent(final Duration diff) {
                 log.info("showing timeskew alert dialog");
-                createTimeskewAlertDialog(diffMinutes).show();
+                createTimeskewAlertDialog(diff).show();
             }
         });
         viewModel.showVersionAlertDialog.observe(this, new Event.Observer<Installer>() {
@@ -135,10 +137,10 @@ public class AlertDialogsFragment extends Fragment {
         }
     }
 
-    private Dialog createTimeskewAlertDialog(final long diffMinutes) {
+    private Dialog createTimeskewAlertDialog(final Duration diff) {
         final Intent settingsIntent = new Intent(android.provider.Settings.ACTION_DATE_SETTINGS);
         final DialogBuilder dialog = DialogBuilder.warn(activity, R.string.wallet_timeskew_dialog_title,
-                R.string.wallet_timeskew_dialog_msg, diffMinutes);
+                R.string.wallet_timeskew_dialog_msg, diff.toMinutes());
         if (packageManager.resolveActivity(settingsIntent, 0) != null) {
             dialog.setPositiveButton(R.string.button_settings, (d, id) -> {
                 try {

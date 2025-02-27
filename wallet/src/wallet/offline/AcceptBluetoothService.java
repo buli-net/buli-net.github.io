@@ -29,7 +29,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.text.format.DateUtils;
 import androidx.annotation.WorkerThread;
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.LifecycleService;
@@ -47,6 +46,8 @@ import wallet.util.CrashReporter;
 import wallet.util.Toast;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -57,11 +58,11 @@ public final class AcceptBluetoothService extends LifecycleService {
     private AcceptBluetoothThread classicThread;
     private AcceptBluetoothThread paymentProtocolThread;
 
-    private long serviceCreatedAt;
+    private Instant serviceCreatedAt;
 
     private final Handler handler = new Handler();
 
-    private static final long TIMEOUT_MS = 5 * DateUtils.MINUTE_IN_MILLIS;
+    private static final Duration TIMEOUT = Duration.ofMinutes(5);
 
     private static final Logger log = LoggerFactory.getLogger(AcceptBluetoothService.class);
 
@@ -76,14 +77,14 @@ public final class AcceptBluetoothService extends LifecycleService {
         super.onStartCommand(intent, flags, startId);
 
         handler.removeCallbacks(timeoutRunnable);
-        handler.postDelayed(timeoutRunnable, TIMEOUT_MS);
+        handler.postDelayed(timeoutRunnable, TIMEOUT.toMillis());
 
         return START_NOT_STICKY;
     }
 
     @Override
     public void onCreate() {
-        serviceCreatedAt = System.currentTimeMillis();
+        serviceCreatedAt = Instant.now();
         log.debug(".onCreate()");
 
         super.onCreate();
@@ -100,7 +101,7 @@ public final class AcceptBluetoothService extends LifecycleService {
         notification.setColor(getColor(R.color.fg_network_significant));
         notification.setSmallIcon(R.drawable.stat_notify_bluetooth_24dp);
         notification.setContentTitle(getString(R.string.notification_bluetooth_service_listening));
-        notification.setWhen(System.currentTimeMillis());
+        notification.setWhen(Instant.now().toEpochMilli());
         notification.setOngoing(true);
         notification.setPriority(NotificationCompat.PRIORITY_LOW);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
@@ -175,7 +176,7 @@ public final class AcceptBluetoothService extends LifecycleService {
 
         super.onDestroy();
 
-        log.info("service was up for " + ((System.currentTimeMillis() - serviceCreatedAt) / 1000 / 60) + " minutes");
+        log.info("service was up for " + Duration.between(serviceCreatedAt, Instant.now()).toMinutes() + " minutes");
     }
 
     private final BroadcastReceiver bluetoothStateChangeReceiver = new BroadcastReceiver() {

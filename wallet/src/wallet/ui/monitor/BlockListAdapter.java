@@ -55,8 +55,9 @@ import wallet.util.WalletUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,27 +66,26 @@ import java.util.Objects;
 import java.util.Set;
 
 public class BlockListAdapter extends ListAdapter<BlockListAdapter.ListItem, RecyclerView.ViewHolder> {
-    public static List<ListItem> buildListItems(final Context context, final List<StoredBlock> blocks, final Date currentTime,
+    public static List<ListItem> buildListItems(final Context context, final List<StoredBlock> blocks, final Instant currentTime,
             final MonetaryFormat format, final @Nullable Set<Transaction> transactions, final @Nullable Wallet wallet,
             final @Nullable Map<String, AddressBookEntry> addressBook) {
         final List<ListItem> items = new ArrayList<>(blocks.size());
         for (final StoredBlock block : blocks) {
             final Sha256Hash blockHash = block.getHeader().getHash();
             final int height = block.getHeight();
-            final long timeMs = block.getHeader().getTimeSeconds() * DateUtils.SECOND_IN_MILLIS;
-            final String time;
-            if (timeMs < currentTime.getTime() - DateUtils.MINUTE_IN_MILLIS)
-                time = DateUtils.getRelativeDateTimeString(context, timeMs, DateUtils.MINUTE_IN_MILLIS,
-                        DateUtils.WEEK_IN_MILLIS, 0).toString();
+            final Instant time = block.getHeader().time();
+            final String timeStr;
+            if (time.compareTo(currentTime.minus(Duration.ofMinutes(1))) < 0)
+                timeStr = DateUtils.getRelativeDateTimeString(context, time.toEpochMilli(), DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0).toString();
             else
-                time = context.getString(R.string.block_row_now);
+                timeStr = context.getString(R.string.block_row_now);
             final List<ListItem.TxItem> transactionItems = buildTransactionItems(context, blockHash, transactions,
                     wallet, addressBook);
             if (((BitcoinNetworkParams) Constants.NETWORK_PARAMETERS).isRewardHalvingPoint(height))
                 items.add(new ListItem.SeparatorItem(context.getString(R.string.block_row_mining_reward_adjustment)));
             if (((BitcoinNetworkParams) Constants.NETWORK_PARAMETERS).isDifficultyTransitionPoint(height))
                 items.add(new ListItem.SeparatorItem(context.getString(R.string.block_row_mining_difficulty_adjustment)));
-            items.add(new ListItem.BlockItem(blockHash, height, time, format, transactionItems));
+            items.add(new ListItem.BlockItem(blockHash, height, timeStr, format, transactionItems));
         }
         return items;
     }

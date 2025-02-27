@@ -47,8 +47,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -162,7 +162,7 @@ public class DynamicFeeLiveData extends LiveData<Map<FeeCategory, Coin>> {
         final Headers.Builder headers = new Headers.Builder();
         headers.add("User-Agent", userAgent);
         if (targetFile.exists())
-            headers.add("If-Modified-Since", new Date(targetFile.lastModified()));
+            headers.add("If-Modified-Since", Instant.ofEpochMilli(targetFile.lastModified()));
         request.headers(headers.build());
 
         final OkHttpClient.Builder httpClientBuilder = Constants.HTTP_CLIENT.newBuilder();
@@ -182,9 +182,9 @@ public class DynamicFeeLiveData extends LiveData<Map<FeeCategory, Coin>> {
                 final FileOutputStream os = new FileOutputStream(tempFile);
                 ByteStreams.copy(body.byteStream(), os);
                 os.close();
-                final Date lastModified = response.headers().getDate("Last-Modified");
+                final Instant lastModified = response.headers().getInstant("Last-Modified");
                 if (lastModified != null)
-                    tempFile.setLastModified(lastModified.getTime());
+                    tempFile.setLastModified(lastModified.toEpochMilli());
                 body.close();
                 if (!tempFile.renameTo(targetFile))
                     throw new IllegalStateException("Cannot rename " + tempFile + " to " + targetFile);

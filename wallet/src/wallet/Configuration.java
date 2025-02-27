@@ -21,7 +21,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.text.format.DateUtils;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.net.HostAndPort;
@@ -32,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import wallet.util.Formats;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Currency;
 import java.util.HashSet;
 import java.util.Locale;
@@ -192,44 +193,44 @@ public class Configuration {
         return Constants.ENABLE_EXCHANGE_RATES && prefs.getBoolean(PREFS_KEY_ENABLE_EXCHANGE_RATES, true);
     }
 
-    private long getBatteryOptimizationDialogTime() {
-        return prefs.getLong(PREFS_KEY_BATTERY_OPTIMIZATION_DIALOG_TIME, 0);
+    private Instant getBatteryOptimizationDialogTime() {
+        return Instant.ofEpochMilli(prefs.getLong(PREFS_KEY_BATTERY_OPTIMIZATION_DIALOG_TIME, 0));
     }
 
     public boolean isTimeForBatteryOptimizationDialog() {
-        final long now = System.currentTimeMillis();
-        return now >= getBatteryOptimizationDialogTime();
+        final Instant now = Instant.now();
+        return now.isAfter(getBatteryOptimizationDialogTime());
     }
 
-    private void setBatteryOptimizationDialogTime(final long batteryOptimizationDialogTime) {
-        prefs.edit().putLong(PREFS_KEY_BATTERY_OPTIMIZATION_DIALOG_TIME, batteryOptimizationDialogTime).apply();
+    private void setBatteryOptimizationDialogTime(final Instant batteryOptimizationDialogTime) {
+        prefs.edit().putLong(PREFS_KEY_BATTERY_OPTIMIZATION_DIALOG_TIME, batteryOptimizationDialogTime.toEpochMilli()).apply();
     }
 
-    public void setBatteryOptimizationDialogTimeIn(final long durationMs) {
-        final long now = System.currentTimeMillis();
-        setBatteryOptimizationDialogTime(now + durationMs);
+    public void setBatteryOptimizationDialogTimeIn(final Duration duration) {
+        final Instant now = Instant.now();
+        setBatteryOptimizationDialogTime(now.plus(duration));
     }
 
     public void removeBatteryOptimizationDialogTime() {
         prefs.edit().remove(PREFS_KEY_BATTERY_OPTIMIZATION_DIALOG_TIME).apply();
     }
 
-    private long getRemindBalanceTime() {
-        return prefs.getLong(PREFS_KEY_REMIND_BALANCE_TIME, 0);
+    private Instant getRemindBalanceTime() {
+        return Instant.ofEpochMilli(prefs.getLong(PREFS_KEY_REMIND_BALANCE_TIME, 0));
     }
 
-    private void setRemindBalanceTime(final long remindBalanceTime) {
-        prefs.edit().putLong(PREFS_KEY_REMIND_BALANCE_TIME, remindBalanceTime).apply();
+    private void setRemindBalanceTime(final Instant remindBalanceTime) {
+        prefs.edit().putLong(PREFS_KEY_REMIND_BALANCE_TIME, remindBalanceTime.toEpochMilli()).apply();
     }
 
     public boolean isTimeToRemindBalance() {
-        final long now = System.currentTimeMillis();
-        return now >= getRemindBalanceTime();
+        final Instant now = Instant.now();
+        return now.equals(getRemindBalanceTime());
     }
 
-    public void setRemindBalanceTimeIn(final long durationMs) {
-        final long now = System.currentTimeMillis();
-        setRemindBalanceTime(now + durationMs);
+    public void setRemindBalanceTimeIn(final Duration duration) {
+        final Instant now = Instant.now();
+        setRemindBalanceTime(now.plus(duration));
     }
 
     public boolean remindBackup() {
@@ -246,7 +247,7 @@ public class Configuration {
 
     public void disarmBackupReminder() {
         prefs.edit().putBoolean(PREFS_KEY_REMIND_BACKUP, false)
-                .putLong(PREFS_KEY_LAST_BACKUP, System.currentTimeMillis()).apply();
+                .putLong(PREFS_KEY_LAST_BACKUP, Instant.now().toEpochMilli()).apply();
     }
 
     public long getLastRestoreTime() {
@@ -254,7 +255,7 @@ public class Configuration {
     }
 
     public void updateLastRestoreTime() {
-        prefs.edit().putLong(PREFS_KEY_LAST_RESTORE, System.currentTimeMillis()).apply();
+        prefs.edit().putLong(PREFS_KEY_LAST_RESTORE, Instant.now().toEpochMilli()).apply();
     }
 
     public long getLastEncryptKeysTime() {
@@ -262,7 +263,7 @@ public class Configuration {
     }
 
     public void updateLastEncryptKeysTime() {
-        prefs.edit().putLong(PREFS_KEY_LAST_ENCRYPT_KEYS, System.currentTimeMillis()).apply();
+        prefs.edit().putLong(PREFS_KEY_LAST_ENCRYPT_KEYS, Instant.now().toEpochMilli()).apply();
     }
 
     public long getLastBlockchainResetTime() {
@@ -270,7 +271,7 @@ public class Configuration {
     }
 
     public void updateLastBlockchainResetTime() {
-        prefs.edit().putLong(PREFS_KEY_LAST_BLOCKCHAIN_RESET, System.currentTimeMillis()).apply();
+        prefs.edit().putLong(PREFS_KEY_LAST_BLOCKCHAIN_RESET, Instant.now().toEpochMilli()).apply();
     }
 
     public boolean getDisclaimerEnabled() {
@@ -314,18 +315,17 @@ public class Configuration {
         return prefs.contains(PREFS_KEY_LAST_USED);
     }
 
-    public long getLastUsedAgo() {
-        final long now = System.currentTimeMillis();
-
-        return now - prefs.getLong(PREFS_KEY_LAST_USED, 0);
+    public Duration getLastUsedAgo() {
+        final Instant now = Instant.now();
+        return Duration.between(Instant.ofEpochMilli(prefs.getLong(PREFS_KEY_LAST_USED, 0)), now);
     }
 
     public void touchLastUsed() {
-        final long prefsLastUsed = prefs.getLong(PREFS_KEY_LAST_USED, 0);
-        final long now = System.currentTimeMillis();
-        prefs.edit().putLong(PREFS_KEY_LAST_USED, now).putLong(PREFS_KEY_REMIND_BALANCE_TIME,
-                now + Constants.LAST_USAGE_THRESHOLD_INACTIVE_MS).apply();
-        log.info("just being used - last used {} minutes ago", (now - prefsLastUsed) / DateUtils.MINUTE_IN_MILLIS);
+        final Instant prefsLastUsed = Instant.ofEpochMilli(prefs.getLong(PREFS_KEY_LAST_USED, 0));
+        final Instant now = Instant.now();
+        prefs.edit().putLong(PREFS_KEY_LAST_USED, now.toEpochMilli()).putLong(PREFS_KEY_REMIND_BALANCE_TIME,
+                now.plus(Constants.LAST_USAGE_THRESHOLD_INACTIVE).toEpochMilli()).apply();
+        log.info("just being used - last used {} minutes ago", Duration.between(prefsLastUsed, now).toMinutes());
     }
 
     public int getBestChainHeightEver() {

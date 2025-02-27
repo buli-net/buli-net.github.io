@@ -20,9 +20,11 @@ package wallet.data;
 import org.bitcoinj.wallet.Wallet;
 import wallet.WalletApplication;
 
+import java.time.Duration;
+
 public class WalletLiveData extends AbstractWalletLiveData<Wallet> {
     public WalletLiveData(final WalletApplication application) {
-        super(application, 0);
+        super(application, Duration.ZERO);
     }
 
     @Override

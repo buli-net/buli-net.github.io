@@ -58,12 +58,14 @@ import wallet.util.Formats;
 import wallet.util.WalletUtils;
 
 import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class TransactionsAdapter extends ListAdapter<TransactionsAdapter.ListItem, RecyclerView.ViewHolder> {
     public static List<ListItem> buildListItems(final Context context, final List<Transaction> transactions,
@@ -227,10 +229,10 @@ public class TransactionsAdapter extends ListAdapter<TransactionsAdapter.ListIte
                 }
 
                 // time
-                final Date time = tx.getUpdateTime();
-                if (time != null && time.getTime() != 0) {
-                    this.time = DateUtils.getRelativeTimeSpanString(context, time.getTime());
-                    this.timeSelected = DateUtils.formatDateTime(context, time.getTime(),
+                final Optional<Instant> time = tx.updateTime();
+                if (time.isPresent()) {
+                    this.time = DateUtils.getRelativeTimeSpanString(context, time.get().toEpochMilli());
+                    this.timeSelected = DateUtils.formatDateTime(context, time.get().toEpochMilli(),
                             DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME);
                     this.timeColor = textColor;
                 } else {
@@ -335,8 +337,10 @@ public class TransactionsAdapter extends ListAdapter<TransactionsAdapter.ListIte
                             .valueOf(context.getString(R.string.transaction_row_message_received_dust));
                     this.messageColor = colorInsignificant;
                 } else if (!sent && confidenceType == ConfidenceType.PENDING
-                        && (tx.getUpdateTime() == null || wallet.getLastBlockSeenTimeSecs() * 1000
-                                - tx.getUpdateTime().getTime() > Constants.DELAYED_TRANSACTION_THRESHOLD_MS)) {
+                        && wallet.lastBlockSeenTime().isPresent()
+                        && tx.updateTime().isPresent()
+                        && Duration.between(tx.updateTime().get(), wallet.lastBlockSeenTime().get())
+                            .compareTo(Constants.DELAYED_TRANSACTION_THRESHOLD) > 0) {
                     this.message = SpannedString
                             .valueOf(context.getString(R.string.transaction_row_message_received_unconfirmed_delayed));
                     this.messageColor = colorInsignificant;

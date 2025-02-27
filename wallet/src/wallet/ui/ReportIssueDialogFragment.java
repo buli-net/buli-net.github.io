@@ -55,10 +55,10 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -230,7 +230,7 @@ public class ReportIssueDialogFragment extends DialogFragment {
         report.append("Battery optimization: ").append(isIgnoringBatteryOptimization ? "no" : "yes").append("\n");
         report.append("Timezone: ").append(TimeZone.getDefault().getID()).append("\n");
         report.append("Current time: ").append(DateTimeFormatter.ISO_INSTANT.format(Instant.now())).append("\n");
-        report.append("Time of app launch: ").append(DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli(WalletApplication.TIME_CREATE_APPLICATION))).append("\n");
+        report.append("Time of app launch: ").append(DateTimeFormatter.ISO_INSTANT.format(WalletApplication.TIME_CREATE_APPLICATION)).append("\n");
         report.append("Time of first app install: ").append(DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli(pi.firstInstallTime))).append("\n");
         report.append("Time of last app update: ").append(DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli(pi.lastUpdateTime))).append("\n");
         final long lastBackupTime = config.getLastBackupTime();
@@ -268,9 +268,10 @@ public class ReportIssueDialogFragment extends DialogFragment {
         report.append("Inputs: ").append(String.valueOf(numInputs)).append("\n");
         report.append("Outputs: ").append(String.valueOf(numOutputs)).append(" (spent: ").append(String.valueOf(numSpentOutputs)).append(")\n");
         final int lastBlockSeenHeight = wallet.getLastBlockSeenHeight();
-        final Date lastBlockSeenTime = wallet.getLastBlockSeenTime();
+        final Optional<Instant> lastBlockSeenTime = wallet.lastBlockSeenTime();
         report.append("Last block seen: ").append(String.valueOf(lastBlockSeenHeight)).append(" (")
-                .append(lastBlockSeenTime == null ? "time unknown" : DateTimeFormatter.ISO_INSTANT.format(lastBlockSeenTime.toInstant()))
+                .append(lastBlockSeenTime.isPresent() ?
+                        DateTimeFormatter.ISO_INSTANT.format(lastBlockSeenTime.get()) : "time unknown")
                 .append(")\n");
         report.append("Best chain height ever: ").append(Integer.toString(config.getBestChainHeightEver()))
                 .append("\n");

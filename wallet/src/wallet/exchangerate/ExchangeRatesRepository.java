@@ -17,7 +17,6 @@
 
 package wallet.exchangerate;
 
-import android.text.format.DateUtils;
 import androidx.room.InvalidationTracker;
 import com.google.common.base.Stopwatch;
 import com.squareup.moshi.Moshi;
@@ -35,13 +34,15 @@ import wallet.Constants;
 import wallet.WalletApplication;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ExchangeRatesRepository {
     private static ExchangeRatesRepository INSTANCE;
 
-    private static final long UPDATE_FREQ_MS = 10 * DateUtils.MINUTE_IN_MILLIS;
+    private static final Duration UPDATE_FREQ = Duration.ofMinutes(10);
     private static final Logger log = LoggerFactory.getLogger(ExchangeRatesRepository.class);
 
     private final WalletApplication application;
@@ -49,7 +50,7 @@ public class ExchangeRatesRepository {
     private final String userAgent;
     private final ExchangeRatesDatabase db;
     private final ExchangeRateDao dao;
-    private final AtomicLong lastUpdated = new AtomicLong(0);
+    private final AtomicReference<Instant> lastUpdated = new AtomicReference<>();
 
     public synchronized static ExchangeRatesRepository get(final WalletApplication application) {
         if (INSTANCE == null)
@@ -80,10 +81,10 @@ public class ExchangeRatesRepository {
             return;
 
         final Stopwatch watch = Stopwatch.createStarted();
-        final long now = System.currentTimeMillis();
+        final Instant now = Instant.now();
 
-        final long lastUpdated = this.lastUpdated.get();
-        if (lastUpdated != 0 && now - lastUpdated <= UPDATE_FREQ_MS)
+        final Instant lastUpdated = this.lastUpdated.get();
+        if (lastUpdated != null && Duration.between(lastUpdated, now).compareTo(UPDATE_FREQ) < 0)
             return;
 
         final CoinGecko coinGecko = new CoinGecko(new Moshi.Builder().build());

@@ -63,10 +63,10 @@ import wallet.util.WalletUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class WalletApplication extends Application {
     private ActivityManager activityManager;
@@ -79,7 +79,7 @@ public class WalletApplication extends Application {
     public final MutableLiveData<Integer> peerState = new MutableLiveData<>();
     public final MutableLiveData<Event<Void>> walletChanged = new MutableLiveData<>();
 
-    public static final long TIME_CREATE_APPLICATION = System.currentTimeMillis();
+    public static final Instant TIME_CREATE_APPLICATION = Instant.now();
     private static final String BIP39_WORDLIST_FILENAME = "bip39-wordlist.txt";
 
     private static final Logger log = LoggerFactory.getLogger(WalletApplication.class);
@@ -196,14 +196,12 @@ public class WalletApplication extends Application {
                         throw new Error("bad wallet network parameters: " + wallet.getParams().getId());
 
                     wallet.cleanup();
-                    walletFiles = wallet.autosaveToFile(walletFile, Constants.Files.WALLET_AUTOSAVE_DELAY_MS,
-                            TimeUnit.MILLISECONDS, null);
+                    walletFiles = wallet.autosaveToFile(walletFile, Constants.Files.WALLET_AUTOSAVE_DELAY, null);
                 } else {
                     final Stopwatch watch = Stopwatch.createStarted();
                     wallet = Wallet.createDeterministic(Constants.NETWORK_PARAMETERS,
                             Constants.DEFAULT_OUTPUT_SCRIPT_TYPE);
-                    walletFiles = wallet.autosaveToFile(walletFile, Constants.Files.WALLET_AUTOSAVE_DELAY_MS,
-                            TimeUnit.MILLISECONDS, null);
+                    walletFiles = wallet.autosaveToFile(walletFile, Constants.Files.WALLET_AUTOSAVE_DELAY, null);
                     autosaveWalletNow(); // persist...
                     WalletUtils.autoBackupWallet(WalletApplication.this, wallet); // ...and backup asap
                     watch.stop();
@@ -257,8 +255,7 @@ public class WalletApplication extends Application {
         final Wallet oldWallet = getWallet();
         synchronized (getWalletLock) {
             oldWallet.shutdownAutosaveAndWait(); // this will also prevent BlockchainService to save
-            walletFiles = newWallet.autosaveToFile(walletFile, Constants.Files.WALLET_AUTOSAVE_DELAY_MS,
-                    TimeUnit.MILLISECONDS, null);
+            walletFiles = newWallet.autosaveToFile(walletFile, Constants.Files.WALLET_AUTOSAVE_DELAY, null);
         }
         config.maybeIncrementBestChainHeightEver(newWallet.getLastBlockSeenHeight());
         WalletUtils.autoBackupWallet(this, newWallet);

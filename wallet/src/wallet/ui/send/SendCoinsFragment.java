@@ -749,7 +749,7 @@ public final class SendCoinsFragment extends Fragment {
                 future.addListener(() -> {
                     // Auto-close the dialog after a short delay
                     if (config.getSendCoinsAutoclose())
-                        handler.postDelayed(() -> activity.finish(), Constants.AUTOCLOSE_DELAY_MS);
+                        handler.postDelayed(() -> activity.finish(), Constants.AUTOCLOSE_DELAY.toMillis());
                 }, Threading.THREAD_POOL);
 
                 final ComponentName callingActivity = activity.getCallingActivity();

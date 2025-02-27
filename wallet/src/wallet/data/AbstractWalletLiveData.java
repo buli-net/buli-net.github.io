@@ -24,6 +24,8 @@ import wallet.WalletApplication;
 import wallet.WalletApplication.OnWalletLoadedListener;
 import wallet.ui.Event;
 
+import java.time.Duration;
+
 public abstract class AbstractWalletLiveData<T> extends ThrottelingLiveData<T> implements Observer<Event<Void>> {
     private final WalletApplication application;
     private final Handler handler = new Handler();
@@ -34,8 +36,8 @@ public abstract class AbstractWalletLiveData<T> extends ThrottelingLiveData<T> i
         this.application = application;
     }
 
-    public AbstractWalletLiveData(final WalletApplication application, final long throttleMs) {
-        super(throttleMs);
+    public AbstractWalletLiveData(final WalletApplication application, final Duration throttle) {
+        super(throttle);
         this.application = application;
     }
 

@@ -22,7 +22,6 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.text.format.DateUtils;
 import androidx.annotation.WorkerThread;
 import androidx.core.app.NotificationCompat;
 import org.bitcoinj.base.Coin;
@@ -40,6 +39,7 @@ import wallet.ui.WalletActivity;
 import wallet.ui.send.FeeCategory;
 import wallet.ui.send.SendCoinsActivity;
 
+import java.time.Duration;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -175,7 +175,7 @@ public class BootstrapReceiver extends BroadcastReceiver {
     @WorkerThread
     private void dismissNotification(final Context context, final Configuration config) {
         log.info("dismissing inactivity notification");
-        config.setRemindBalanceTimeIn(DateUtils.DAY_IN_MILLIS);
+        config.setRemindBalanceTimeIn(Duration.ofDays(1));
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
         nm.cancel(Constants.NOTIFICATION_ID_INACTIVITY);
     }
@@ -183,7 +183,7 @@ public class BootstrapReceiver extends BroadcastReceiver {
     @WorkerThread
     private void dismissNotificationForever(final Context context, final Configuration config) {
         log.info("dismissing inactivity notification forever");
-        config.setRemindBalanceTimeIn(DateUtils.WEEK_IN_MILLIS * 52);
+        config.setRemindBalanceTimeIn(Duration.ofDays(365));
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
         nm.cancel(Constants.NOTIFICATION_ID_INACTIVITY);
     }

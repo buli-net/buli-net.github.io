@@ -25,7 +25,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.PowerManager;
-import android.text.format.DateUtils;
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -56,8 +55,9 @@ import java.io.BufferedReader;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -70,7 +70,7 @@ public class AlertDialogsViewModel extends AndroidViewModel {
     private final Configuration config;
     private final PowerManager powerManager;
     public final @Nullable Installer installer;
-    public final MutableLiveData<Event<Long>> showTimeskewAlertDialog = new MutableLiveData<>();
+    public final MutableLiveData<Event<Duration>> showTimeskewAlertDialog = new MutableLiveData<>();
     public final MutableLiveData<Event<Installer>> showVersionAlertDialog = new MutableLiveData<>();
     public final MutableLiveData<Event<String>> showInsecureDeviceAlertDialog = new MutableLiveData<>();
     public final MutableLiveData<Event<Void>> showLowStorageAlertDialog = new MutableLiveData<>();
@@ -129,14 +129,13 @@ public class AlertDialogsViewModel extends AndroidViewModel {
             final Response response = call.execute();
             if (response.isSuccessful()) {
                 // Maybe show timeskew alert.
-                final Date serverDate = response.headers().getDate("Date");
-                if (serverDate != null) {
-                    final long diffMinutes = Math.abs(
-                            (System.currentTimeMillis() - serverDate.getTime()) / DateUtils.MINUTE_IN_MILLIS);
-                    if (diffMinutes >= 60) {
-                        log.info("according to \"" + versionUrl + "\", system clock is off by " + diffMinutes
+                final Instant serverTime = response.headers().getInstant("Date");
+                if (serverTime != null) {
+                    final Duration diff = Duration.between(serverTime, Instant.now()).abs();
+                    if (diff.compareTo(Duration.ofHours(1)) > 0) {
+                        log.info("according to \"" + versionUrl + "\", system clock is off by " + diff.toMinutes()
                                 + " minutes");
-                        showTimeskewAlertDialog.postValue(new Event<>(diffMinutes));
+                        showTimeskewAlertDialog.postValue(new Event<>(diff));
                         return;
                     }
                 }
@@ -259,6 +258,6 @@ public class AlertDialogsViewModel extends AndroidViewModel {
 
     @MainThread
     public void handleBatteryOptimizationDialogNegativeButton() {
-        config.setBatteryOptimizationDialogTimeIn(DateUtils.WEEK_IN_MILLIS * 12);
+        config.setBatteryOptimizationDialogTimeIn(Duration.ofDays(12 * 7));
     }
 }

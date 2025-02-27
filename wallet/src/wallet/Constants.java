@@ -18,7 +18,6 @@
 package wallet;
 
 import android.os.Build;
-import android.text.format.DateUtils;
 import com.google.common.io.BaseEncoding;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -94,7 +93,7 @@ public final class Constants {
         public static final String WALLET_FILENAME_PROTOBUF = "wallet-protobuf" + FILENAME_NETWORK_SUFFIX;
 
         /** How often the wallet is autosaved. */
-        public static final long WALLET_AUTOSAVE_DELAY_MS = 3 * DateUtils.SECOND_IN_MILLIS;
+        public static final Duration WALLET_AUTOSAVE_DELAY = Duration.ofSeconds(3);
 
         /** Filename of the automatic key backup (old format, can only be read). */
         public static final String WALLET_KEY_BACKUP_BASE58 = "key-backup-base58" + FILENAME_NETWORK_SUFFIX;
@@ -188,13 +187,13 @@ public final class Constants {
 
     public static final String BINARY_URL = "https://wallet.schildbach.de/";
 
-    public static final int PEER_DISCOVERY_TIMEOUT_MS = 5 * (int) DateUtils.SECOND_IN_MILLIS;
-    public static final int PEER_TIMEOUT_MS = 15 * (int) DateUtils.SECOND_IN_MILLIS;
+    public static final Duration PEER_DISCOVERY_TIMEOUT = Duration.ofSeconds(5);
+    public static final Duration PEER_TIMEOUT = Duration.ofSeconds(15);
 
-    public static final long LAST_USAGE_THRESHOLD_JUST_MS = DateUtils.HOUR_IN_MILLIS;
-    public static final long LAST_USAGE_THRESHOLD_TODAY_MS = DateUtils.DAY_IN_MILLIS;
-    public static final long LAST_USAGE_THRESHOLD_RECENTLY_MS = DateUtils.WEEK_IN_MILLIS;
-    public static final long LAST_USAGE_THRESHOLD_INACTIVE_MS = 4 * DateUtils.WEEK_IN_MILLIS;
+    public static final Duration LAST_USAGE_THRESHOLD_JUST = Duration.ofHours(1);
+    public static final Duration LAST_USAGE_THRESHOLD_TODAY = Duration.ofDays(1);
+    public static final Duration LAST_USAGE_THRESHOLD_RECENTLY = Duration.ofDays(7);
+    public static final Duration LAST_USAGE_THRESHOLD_INACTIVE = Duration.ofDays(4 * 7);
 
     public static final Duration SERVICE_STOP_DELAY_AFTER_START =
             NETWORK_PARAMETERS.getId().equals(BitcoinNetwork.ID_MAINNET) ?
@@ -207,9 +206,9 @@ public final class Constants {
                     Duration.ofSeconds(30) :
                     Duration.ofMinutes(2);
 
-    public static final long DELAYED_TRANSACTION_THRESHOLD_MS = 2 * DateUtils.HOUR_IN_MILLIS;
+    public static final Duration DELAYED_TRANSACTION_THRESHOLD = Duration.ofHours(2);
 
-    public static final long AUTOCLOSE_DELAY_MS = 1000;
+    public static final Duration AUTOCLOSE_DELAY = Duration.ofSeconds(1);
 
     /** A balance above this amount will show a warning */
     public static final Coin TOO_MUCH_BALANCE_THRESHOLD = Coin.COIN.divide(32);
