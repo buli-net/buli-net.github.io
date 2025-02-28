@@ -35,7 +35,7 @@ trixie-jdk21:
   image: debian:trixie-slim
   script:
     - apt-get update
-    - apt-get -y install openjdk-21-jdk-headless gradle sdkmanager
+    - apt-get -y install openjdk-21-jdk-headless gradle sdkmanager gpg
     - yes | sdkmanager --licenses >/dev/null || true
     - gradle build --stacktrace
     - gradle --version
