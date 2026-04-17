@@ -49,7 +49,11 @@ RUN --mount=target=/home/builder/android-sdk,type=cache,uid=1000,gid=1000,sharin
       then /bin/mv project project.u && /bin/mkdir project && \
       /usr/bin/disorderfs --sort-dirents=yes --reverse-dirents=no project.u project ; \
     fi && \
-    /usr/bin/gradle --project-dir project/ --no-build-cache --no-daemon --no-parallel clean :wallet:assembleRelease && \
+    /usr/bin/gradle --project-dir project/ --no-build-cache --no-daemon --no-parallel \
+                    clean :wallet:assembleRelease \
+                    --exclude-task :wallet:compileTestnetReleaseAidl --exclude-task :wallet:compileTestnetReleaseRenderscript \
+                    --exclude-task :wallet:compileSignetReleaseAidl --exclude-task :wallet:compileSignetReleaseRenderscript \
+                    --exclude-task :wallet:compileMainnetReleaseAidl --exclude-task :wallet:compileMainnetReleaseRenderscript && \
     if [ -e /dev/fuse ] ; \
       then /usr/bin/sleep 1 && /bin/fusermount -u project && /bin/rmdir project && /bin/mv project.u project ; \
     fi
