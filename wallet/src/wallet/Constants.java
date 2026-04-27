@@ -271,7 +271,7 @@ public final class Constants {
 
         final OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
         httpClientBuilder.followRedirects(false);
-        httpClientBuilder.followSslRedirects(true);
+        httpClientBuilder.followSslRedirects(false);
         httpClientBuilder.connectTimeout(15, TimeUnit.SECONDS);
         httpClientBuilder.writeTimeout(15, TimeUnit.SECONDS);
         httpClientBuilder.readTimeout(15, TimeUnit.SECONDS);
