@@ -92,6 +92,18 @@
             android:title="@string/preferences_enable_exchange_rates_title"
             android:summary="@string/preferences_enable_exchange_rates_summary"
             android:defaultValue="true" />
+
+        <!-- needs two copies because we can't set the defaultValue programmatically -->
+        <CheckBoxPreference
+            android:key="enable_dynamic_fees"
+            android:title="@string/preferences_enable_dynamic_fees_title"
+            android:summary="@string/preferences_enable_dynamic_fees_summary"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="enable_dynamic_fees_default_false"
+            android:title="@string/preferences_enable_dynamic_fees_title"
+            android:summary="@string/preferences_enable_dynamic_fees_summary"
+            android:defaultValue="false" />
     </PreferenceCategory>
 
     <PreferenceCategory

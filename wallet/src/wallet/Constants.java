@@ -152,7 +152,7 @@ public final class Constants {
     /** URL to fetch version alerts from. */
     public static final HttpUrl VERSION_URL= HttpUrl.parse("https://wallet.schildbach.de/version" + URL_SUFFIX);
 
-    /** URL to fetch dynamic fees from. */
+    /** URL to fetch dynamic fees from, if enabled. */
     public static final HttpUrl DYNAMIC_FEES_URL = HttpUrl.parse("https://wallet.schildbach.de/fees" + URL_SUFFIX);
 
     /** MIME type used for transmitting single transactions. */

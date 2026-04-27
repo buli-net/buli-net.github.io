@@ -32,6 +32,7 @@ import okhttp3.ResponseBody;
 import org.bitcoinj.base.Coin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import wallet.Configuration;
 import wallet.Constants;
 import wallet.WalletApplication;
 import wallet.ui.send.FeeCategory;
@@ -50,6 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DynamicFeeLiveData extends LiveData<Map<FeeCategory, Coin>> {
+    private final Configuration config;
     private final HttpUrl dynamicFeesUrl;
     private final AssetManager assets;
     private final File dynamicFeesFile;
@@ -58,6 +60,7 @@ public class DynamicFeeLiveData extends LiveData<Map<FeeCategory, Coin>> {
     private static final Logger log = LoggerFactory.getLogger(DynamicFeeLiveData.class);
 
     public DynamicFeeLiveData(final WalletApplication application) {
+        this.config = application.getConfiguration();
         final PackageInfo packageInfo = application.packageInfo();
         final int versionNameSplit = packageInfo.versionName.indexOf('-');
         this.dynamicFeesUrl = HttpUrl.parse(Constants.DYNAMIC_FEES_URL
@@ -78,7 +81,8 @@ public class DynamicFeeLiveData extends LiveData<Map<FeeCategory, Coin>> {
     private Map<FeeCategory, Coin> loadInBackground() {
         try {
             final Map<FeeCategory, Coin> staticFees = parseFees(assets.open(Constants.Files.FEES_ASSET));
-            fetchDynamicFees(dynamicFeesUrl, tempFile, dynamicFeesFile);
+            if (config.isEnableDynamicFees())
+                fetchDynamicFees(dynamicFeesUrl, tempFile, dynamicFeesFile);
             if (!dynamicFeesFile.exists())
                 return staticFees;
 

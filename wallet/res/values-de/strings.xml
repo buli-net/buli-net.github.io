@@ -279,6 +279,8 @@
     <string name="preferences_enable_version_check_summary">Regelmäßige Suche nach kritischen Updates der App. Vor einer Installation wirst du trotzdem noch gefragt. Diese Auswahl sammelt keine persönlichen Daten.</string>
     <string name="preferences_enable_exchange_rates_title">Lokale Beträge zeigen</string>
     <string name="preferences_enable_exchange_rates_summary">Ruft die Wechselkurse von einem Feed ab, um lokale Beträge auszurechnen.</string>
+    <string name="preferences_enable_dynamic_fees_title">Dynamische Netzwerk-Gebühr verwenden</string>
+    <string name="preferences_enable_dynamic_fees_summary">Aktualisiert die nötige Netzwerk-Gebühr von einem Feed, um sich an die Marktsituation anzupassen.</string>
     <string name="preferences_data_usage_title">Datenverbrauch</string>
     <string name="preferences_data_usage_summary">Zeigt Optionen um die mobile Datennutzung einzuschränken.</string>
     <string name="preferences_battery_optimization_title">Akkuoptimierung abschalten</string>

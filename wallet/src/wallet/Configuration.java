@@ -54,6 +54,8 @@ public class Configuration {
     public static final String PREFS_KEY_BLOCK_EXPLORER = "block_explorer";
     public static final String PREFS_KEY_ENABLE_VERSION_CHECK = "enable_version_check";
     public static final String PREFS_KEY_ENABLE_VERSION_CHECK_DEFAULT_FALSE = "enable_version_check_default_false";
+    public static final String PREFS_KEY_ENABLE_DYNAMIC_FEES = "enable_dynamic_fees";
+    public static final String PREFS_KEY_ENABLE_DYNAMIC_FEES_DEFAULT_FALSE = "enable_dynamic_fees_default_false";
     public static final String PREFS_KEY_ENABLE_EXCHANGE_RATES = "enable_exchange_rates";
     public static final String PREFS_KEY_DATA_USAGE = "data_usage";
     public static final String PREFS_KEY_BATTERY_OPTIMIZATION = "battery_optimization";
@@ -199,6 +201,16 @@ public class Configuration {
         return prefs.getBoolean(getEnableVersionCheckDefault() ?
                 PREFS_KEY_ENABLE_VERSION_CHECK : PREFS_KEY_ENABLE_VERSION_CHECK_DEFAULT_FALSE,
                 getEnableVersionCheckDefault());
+    }
+
+    public boolean getEnableDynamicFeesDefault() {
+        return Constants.NETWORK_PARAMETERS.getId().equals(BitcoinNetwork.ID_MAINNET);
+    }
+
+    public boolean isEnableDynamicFees() {
+        return prefs.getBoolean(getEnableDynamicFeesDefault() ?
+                PREFS_KEY_ENABLE_DYNAMIC_FEES : PREFS_KEY_ENABLE_DYNAMIC_FEES_DEFAULT_FALSE,
+                getEnableDynamicFeesDefault());
     }
 
     public boolean isEnableExchangeRates() {

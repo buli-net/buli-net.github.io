@@ -143,6 +143,11 @@ public final class SettingsFragment extends PreferenceFragment implements OnPref
         if (notificationsPreference.getIntent() == null || pm.resolveActivity(notificationsPreference.getIntent(), 0) == null)
             removePreference(notificationsPreference);
 
+        final Preference enableDynamicFeesPreferenceToRemove = findPreference(config.getEnableDynamicFeesDefault() ?
+                Configuration.PREFS_KEY_ENABLE_DYNAMIC_FEES_DEFAULT_FALSE :
+                Configuration.PREFS_KEY_ENABLE_DYNAMIC_FEES);
+        removePreference(enableDynamicFeesPreferenceToRemove);
+
         ownNamePreference = findPreference(Configuration.PREFS_KEY_OWN_NAME);
         ownNamePreference.setOnPreferenceChangeListener(this);
 

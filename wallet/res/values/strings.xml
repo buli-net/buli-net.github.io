@@ -276,6 +276,8 @@
     <string name="preferences_enable_version_check_summary">Regular check for critical app updates. You will still be asked before installing an update. This selection does not collect any personal information.</string>
     <string name="preferences_enable_exchange_rates_title">Show local amounts</string>
     <string name="preferences_enable_exchange_rates_summary">Fetch exchange rates from a feed in order to calculate local amounts.</string>
+    <string name="preferences_enable_dynamic_fees_title">Use live network fees</string>
+    <string name="preferences_enable_dynamic_fees_summary">Update required network fees from a feed in order to adapt to the fee market.</string>
     <string name="preferences_data_usage_title">Data usage</string>
     <string name="preferences_data_usage_summary">Show options to restrict data usage on mobile networks.</string>
     <string name="preferences_battery_optimization_title">Disable battery optimization</string>
