@@ -74,6 +74,16 @@ import wallet.util.CrashReporter;
 import wallet.util.Nfc;
 import wallet.util.OnFirstPreDraw;
 
+// add bar sync
+import android.content.SharedPreferences;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import java.util.Locale;
+//end
+
 public final class WalletActivity extends AbstractWalletActivity {
     private WalletApplication application;
     private Configuration config;
