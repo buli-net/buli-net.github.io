@@ -6,6 +6,9 @@ v11.04 mod by buli
 - Create file wallet/src/wallet/ui/TransactionDetailsActivity.java
 - Create file wallet/res/layout/activity_transaction_details.xml
 
+- Add code file wallet/res/menu/wallet_transactions_context.xml [ add code line 11->16 ]
+- Add code file wallet/AndroidManifest.xml [ add code line 91-->95 ]
+- Add code file wallet/src/wallet/ui/WalletTransactionsFragment.java [ add code line 63-->65, 312-->319 ]
 
 
 
