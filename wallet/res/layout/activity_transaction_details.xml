@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/tx_page_bg"
-    android:padding="12dp">
+    android:padding="8dp">
 
     <LinearLayout
         android:orientation="vertical"
@@ -14,12 +14,12 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="0dp"
             app:cardBackgroundColor="@color/tx_card_bg"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="8dp">
             <LinearLayout
-                android:padding="20dp"
+                android:padding="16dp"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -44,10 +44,10 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="0dp"
             app:cardBackgroundColor="@color/tx_card_bg"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="8dp">
             <LinearLayout
                 android:padding="16dp"
                 android:orientation="vertical"
@@ -109,10 +109,10 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="0dp"
             app:cardBackgroundColor="@color/tx_card_bg"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="8dp">
             <LinearLayout
                 android:padding="16dp"
                 android:orientation="vertical"
@@ -146,8 +146,8 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="0dp"
             app:cardBackgroundColor="@color/tx_card_bg">
             <LinearLayout
                 android:padding="16dp"
