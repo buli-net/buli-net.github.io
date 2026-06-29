@@ -27,6 +27,8 @@ import java.util.Locale;
 import wallet.R;
 import wallet.WalletApplication;
 
+import org.bitcoinj.core.TransactionOutPoint;
+
 public class TransactionDetailsActivity extends Activity {
     private TextView tvDirection, tvAmount, tvStatus, tvFee, tvTime, tvFrom, tvTo, tvTxid, tvHeight, tvMeta;
 
