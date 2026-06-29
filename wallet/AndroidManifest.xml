@@ -94,7 +94,7 @@
             android:label="Transaction Details"
             android:exported="false"
             android:parentActivityName="wallet.ui.WalletActivity"
-            android:theme="@android:style/Theme.Material.Light.DarkActionBar" />
+            android:theme="@style/My.Preference" />
 <!-- end  -->     
         <activity
             android:name="wallet.ui.WalletActivity"
