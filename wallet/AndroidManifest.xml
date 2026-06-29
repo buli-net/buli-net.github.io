@@ -89,11 +89,12 @@
         android:localeConfig="@xml/locale_config"
         android:networkSecurityConfig="@xml/network_security_config">
 <!-- info i -->
-<activity
-    android:name="wallet.ui.TransactionDetailsActivity"
-    android:label="Transaction Details"
-    android:theme="@style/My.Theme"
-    android:exported="false" />
+
+         <activity
+            android:name=".ui.TransactionDetailsActivity"
+            android:label="Transaction Details"
+            android:exported="false"
+            android:theme="@style/My.Theme" />
 <!--   -->     
         <activity
             android:name="wallet.ui.WalletActivity"
