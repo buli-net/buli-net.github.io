@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="tx_card_bg">#1E1E</color>
+    <color name="tx_card_bg">#1E1E1E</color>
     <color name="tx_amount_sent">#EF5350</color>
     <color name="tx_amount_recv">#66BB6A</color>
     <color name="tx_status_ok">#69F0AE</color>
