@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="tx_card_bg">#FFFFFF</color>
+    <color name="tx_amount_sent">#D32F2F</color>
+    <color name="tx_amount_recv">#2E7D32</color>
+    <color name="tx_status_ok">#00C853</color>
+    <color name="tx_status_pending">#FFA000</color>
+</resources>
