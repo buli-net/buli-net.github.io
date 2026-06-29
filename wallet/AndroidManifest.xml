@@ -91,7 +91,6 @@
 <!-- info i -->
         <activity
     android:name=".ui.TransactionDetailsActivity"
-    android:theme="@style/My.Theme"
     android:label="Transaction Details" />
 <!--   -->     
         <activity
