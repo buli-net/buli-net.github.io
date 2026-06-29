@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="tx_page_bg">#1e1a24</color>
+    <color name="tx_page_bg">#10121c</color>
     <color name="tx_card_bg">#2a303c</color>
     <color name="tx_text_primary">#e0e0e0</color>
     <color name="tx_text_secondary">#9aa0aa</color>
