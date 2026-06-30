@@ -39,7 +39,53 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Transaction details -->
+        <!-- Actual Sender / Receiver card -->
+        <!-- Shows the counterparty address only, separate from the amount card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/tx_card_bg"
+            android:layout_marginBottom="8dp">
+            <LinearLayout
+                android:padding="16dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView android:text="From"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="@color/tx_text_secondary"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tv_actual_from"
+                    android:textColor="@color/tx_text_primary"
+                    android:textIsSelectable="true"
+                    android:fontFamily="monospace"
+                    android:textSize="13sp"
+                    android:layout_marginTop="4dp"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                <!-- Thin divider between From and To -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#33000000"/>
+                <TextView android:text="To"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="@color/tx_text_secondary"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tv_actual_to"
+                    android:textColor="@color/tx_text_primary"
+                    android:textIsSelectable="true"
+                    android:fontFamily="monospace"
+                    android:textSize="13sp"
+                    android:layout_marginTop="4dp"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Transaction details card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -118,7 +164,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- From / To -->
+        <!-- Full Input / Output list card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -166,7 +212,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- TxID -->
+        <!-- Transaction ID card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
