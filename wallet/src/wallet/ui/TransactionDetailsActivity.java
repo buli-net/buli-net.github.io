@@ -445,8 +445,6 @@ public class TransactionDetailsActivity extends Activity {
     private void showQrDialog() {
         boolean dark = isDark();
         int bgColor = dark ? Color.BLACK : Color.WHITE;
-
-//////
         
  int dialogTheme = dark
     ? android.R.style.Theme_Black_NoTitleBar_Fullscreen
@@ -454,21 +452,16 @@ public class TransactionDetailsActivity extends Activity {
 
 qrDialog = new Dialog(this, dialogTheme);
 
-///////////
-
-        qrDialog.getWindow().setFlags(
+qrDialog.getWindow().setFlags(
     android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN,
     android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 if (android.os.Build.VERSION.SDK_INT >= 21) {
     qrDialog.getWindow().setStatusBarColor(bgColor);
 }
-        
-// qrDialog.getWindow().setStatusBarColor(bgColor);
 qrDialog.getWindow().getDecorView().setSystemUiVisibility(
    android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
   | android.view.View.SYSTEM_UI_FLAG_FULLSCREEN);
-
         
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
