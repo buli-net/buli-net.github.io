@@ -451,11 +451,6 @@ int dialogTheme = dark
     : android.R.style.Theme_Light_NoTitleBar_Fullscreen;
 
 qrDialog = new Dialog(this, dialogTheme);
-        
-
-//qrDialog.getWindow().setFlags(
-    //android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN,
-  //  android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 qrDialog.getWindow().setStatusBarColor(bgColor);
 qrDialog.getWindow().getDecorView().setSystemUiVisibility(
