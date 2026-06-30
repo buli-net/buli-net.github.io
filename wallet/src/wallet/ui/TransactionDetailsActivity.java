@@ -446,8 +446,13 @@ public class TransactionDetailsActivity extends Activity {
         boolean dark = isDark();
         int bgColor = dark ? Color.BLACK : Color.WHITE;
 
-        qrDialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+      //  qrDialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+int dialogTheme = dark 
+    ? android.R.style.Theme_Black_NoTitleBar_Fullscreen
+    : android.R.style.Theme_DeviceDefault_Light_NoTitleBar_Fullscreen;
 
+qrDialog = new Dialog(this, dialogTheme);
+       
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(bgColor);
