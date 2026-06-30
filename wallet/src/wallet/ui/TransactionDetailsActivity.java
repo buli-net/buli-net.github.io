@@ -68,7 +68,7 @@ public class TransactionDetailsActivity extends Activity {
     private Bitmap currentQrBitmap;
     private TextView tvTxidCopy;
 
-    // --- LIVE PATCH: giữ tx/wallet/params để listener dùng ---
+    // --- LIVE PATCH: keep tx/wallet/params for listener ---
     private Transaction tx;
     private Wallet wallet;
     private NetworkParameters params;
@@ -113,6 +113,13 @@ public class TransactionDetailsActivity extends Activity {
         tvActualTo = findViewById(R.id.tv_actual_to);
         ivQr = findViewById(R.id.iv_tx_qr);
         tvTxidCopy = findViewById(R.id.tv_txid_copy);
+
+        // Right-align Transaction details values to match mockup
+        if (tvStatus != null) { tvStatus.setGravity(Gravity.END); tvStatus.setTextAlignment(TextView.TEXT_ALIGNMENT_VIEW_END); }
+        if (tvFee != null) { tvFee.setGravity(Gravity.END); tvFee.setTextAlignment(TextView.TEXT_ALIGNMENT_VIEW_END); }
+        if (tvTime != null) { tvTime.setGravity(Gravity.END); tvTime.setTextAlignment(TextView.TEXT_ALIGNMENT_VIEW_END); }
+        if (tvHeight != null) { tvHeight.setGravity(Gravity.END); tvHeight.setTextAlignment(TextView.TEXT_ALIGNMENT_VIEW_END); }
+        if (tvMeta != null) { tvMeta.setGravity(Gravity.END); tvMeta.setTextAlignment(TextView.TEXT_ALIGNMENT_VIEW_END); }
 
         // Get transaction hash from intent
         String txidStr = getIntent().getStringExtra("txid");
@@ -441,7 +448,7 @@ public class TransactionDetailsActivity extends Activity {
         copy(buildLiveTxText());
     }
 
-    // --- QR dialog với Save / Share / Explore ---
+    // --- QR dialog with Save / Share / Explore ---
     private void showQrDialog() {
         boolean dark = isDark();
         int bgColor = dark ? Color.BLACK : Color.WHITE;
@@ -514,7 +521,7 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
         col.setPadding(8, 8, 8, 8);
 
         ImageView iv = new ImageView(this);
-        // icon màu mặc định
+        // default system icon color
         iv.setImageResource(iconRes);
         int iconSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36, getResources().getDisplayMetrics());
         LinearLayout.LayoutParams ivLp = new LinearLayout.LayoutParams(iconSize, iconSize);
@@ -524,7 +531,7 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
 
         TextView tv = new TextView(this);
         tv.setText(label);
-        // chữ xám cùng tông với icon hệ thống
+        // gray text matching system icon tone
         tv.setTextColor(dark ? 0xFFBBBBBB : 0xFF666666);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         tv.setGravity(Gravity.CENTER);
