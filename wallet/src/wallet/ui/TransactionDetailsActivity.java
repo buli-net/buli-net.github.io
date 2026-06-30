@@ -452,6 +452,10 @@ int dialogTheme = dark
     : android.R.style.Theme_Light_NoTitleBar_Fullscreen;
 
 qrDialog = new Dialog(this, dialogTheme);
+
+        qrDialog.getWindow().setFlags(
+    android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN,
+    android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
        
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
