@@ -446,11 +446,11 @@ public class TransactionDetailsActivity extends Activity {
         boolean dark = isDark();
         int bgColor = dark ? Color.BLACK : Color.WHITE;
 
-//int dialogTheme = dark
- //   ? android.R.style.Theme_Black_NoTitleBar_Fullscreen
-//    : android.R.style.Theme_Light_NoTitleBar_Fullscreen;
+int dialogTheme = dark
+    ? android.R.style.Theme_Black_NoTitleBar_Fullscreen
+    : android.R.style.Theme_Light_NoTitleBar_Fullscreen;
 
-//qrDialog = new Dialog(this, dialogTheme);
+qrDialog = new Dialog(this, dialogTheme);
         
 
 //qrDialog.getWindow().setFlags(
