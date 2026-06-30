@@ -39,8 +39,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Actual Sender / Receiver card -->
-        <!-- Shows the counterparty address only, separate from the amount card -->
+        <!-- Sender / Receiver card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -53,6 +52,14 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+                <!-- Card title - same style as other cards -->
+                <TextView android:text="Sender / Receiver"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/tx_text_primary"
+                    android:layout_marginBottom="12dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
                 <TextView android:text="From"
                     android:textStyle="bold"
                     android:textSize="14sp"
@@ -164,7 +171,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Full Input / Output list card -->
+        <!-- Input / Output full list card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -177,7 +184,8 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-                <TextView android:text="From"
+                <!-- Changed from "From" to "Sent Details" -->
+                <TextView android:text="Sent Details"
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:textColor="@color/tx_text_primary"
@@ -194,7 +202,8 @@
                     android:layout_width="match_parent" android:layout_height="wrap_content"/>
                 <View android:layout_width="match_parent" android:layout_height="1dp"
                     android:background="#33000000"/>
-                <TextView android:text="To"
+                <!-- Changed from "To" to "Received Details" -->
+                <TextView android:text="Received Details"
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:textColor="@color/tx_text_primary"
