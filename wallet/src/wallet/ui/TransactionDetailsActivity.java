@@ -452,6 +452,11 @@ int dialogTheme = dark
 
 qrDialog = new Dialog(this, dialogTheme);
 
+
+if (android.os.Build.VERSION.SDK_INT >= 21) {
+    qrDialog.getWindow().setStatusBarColor(bgColor);
+}
+        
 qrDialog.getWindow().setStatusBarColor(bgColor);
 qrDialog.getWindow().getDecorView().setSystemUiVisibility(
    android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -509,7 +514,7 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
         col.setPadding(8, 8, 8, 8);
 
         ImageView iv = new ImageView(this);
-        // icon mặc định hệ thống, không ép màu
+        // icon màu mặc định
         iv.setImageResource(iconRes);
         int iconSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36, getResources().getDisplayMetrics());
         LinearLayout.LayoutParams ivLp = new LinearLayout.LayoutParams(iconSize, iconSize);
