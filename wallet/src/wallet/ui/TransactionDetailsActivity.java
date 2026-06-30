@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -501,9 +502,14 @@ public class TransactionDetailsActivity extends Activity {
         col.setPadding(8, 8, 8, 8);
 
         ImageView iv = new ImageView(this);
-        iv.setImageResource(iconRes);
-        // ép tint full, icon hệ thống cũ mới trắng/đen đặc được
-        iv.setColorFilter(tint, PorterDuff.Mode.SRC_IN);
+        // Tint qua DrawableCompat để icon hệ thống xám cũng thành đen/trắng đặc
+        Drawable d = androidx.core.content.ContextCompat.getDrawable(this, iconRes);
+        if (d != null) {
+            d = androidx.core.graphics.drawable.DrawableCompat.wrap(d).mutate();
+            androidx.core.graphics.drawable.DrawableCompat.setTint(d, tint);
+            androidx.core.graphics.drawable.DrawableCompat.setTintMode(d, PorterDuff.Mode.SRC_IN);
+            iv.setImageDrawable(d);
+        }
         int iconSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36, getResources().getDisplayMetrics());
         LinearLayout.LayoutParams ivLp = new LinearLayout.LayoutParams(iconSize, iconSize);
         ivLp.gravity = Gravity.CENTER;
