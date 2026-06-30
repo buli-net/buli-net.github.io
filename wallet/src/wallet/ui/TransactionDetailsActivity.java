@@ -5,13 +5,21 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +41,7 @@ import org.bitcoinj.script.ScriptException;
 import org.bitcoinj.script.ScriptPattern;
 import org.bitcoinj.wallet.Wallet;
 
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -151,7 +160,6 @@ public class TransactionDetailsActivity extends Activity {
         } catch (Exception ignored) {}
 
         // --- Confirmation status: Pending / Building / Confirmed ---
-        // LIVE PATCH: logic này giờ nằm trong refreshLiveFields(), gọi 1 lần ở đây để fill ban đầu
         refreshLiveFields();
 
         // --- Fee ---
@@ -184,7 +192,7 @@ public class TransactionDetailsActivity extends Activity {
         }
         tvMeta.setText(size + " bytes · " + weight + " wu" + feeRate + (rbf ? " · RBF" : ""));
 
-        // --- Actual sender / receiver (counterparty only) ---
+        // --- Actual sender / receiver ---
         String actualFrom = null;
         String actualTo = null;
         try {
@@ -269,7 +277,6 @@ public class TransactionDetailsActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        // LIVE PATCH: đăng ký listener, refresh ngay
         if (tx != null && tx.getConfidence() != null) {
             tx.getConfidence().addEventListener(confidenceListener);
         }
@@ -279,7 +286,6 @@ public class TransactionDetailsActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        // LIVE PATCH: gỡ listener tránh leak
         if (tx != null && tx.getConfidence() != null) {
             tx.getConfidence().removeEventListener(confidenceListener);
         }
@@ -320,10 +326,6 @@ public class TransactionDetailsActivity extends Activity {
         return "nonstandard";
     }
 
-    /**
-     * Find the first input address matching the mine filter.
-     * @param mineOnly true = only mine, false = only non-mine, null = any
-     */
     private String getInputAddress(Transaction tx, NetworkParameters params, Wallet wallet, Boolean mineOnly) {
         if (tx.getInputs() == null) return null;
         for (TransactionInput in : tx.getInputs()) {
@@ -350,10 +352,6 @@ public class TransactionDetailsActivity extends Activity {
         return null;
     }
 
-    /**
-     * Find the first output address matching the mine filter.
-     * @param mineOnly true = only mine, false = only non-mine, null = any
-     */
     private String getOutputAddress(Transaction tx, NetworkParameters params, Wallet wallet, Boolean mineOnly) {
         if (tx.getOutputs() == null) return null;
         for (TransactionOutput out : tx.getOutputs()) {
@@ -370,13 +368,11 @@ public class TransactionDetailsActivity extends Activity {
         return null;
     }
 
-    /** Make a TextView copy its content on tap. */
     private void copyOnClick(TextView tv, String text) {
         if (tv == null) return;
         tv.setOnClickListener(v -> copy(text));
     }
 
-    /** Copy text to clipboard with a toast. */
     private void copy(String text) {
         try {
             ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -426,15 +422,14 @@ public class TransactionDetailsActivity extends Activity {
     private void updateLiveQr() {
         try {
             String text = buildLiveTxText();
-            // QR nhỏ trong card
             if (ivQr != null) {
                 currentQrBitmap = encodeQr(text, 512);
                 ivQr.setImageBitmap(currentQrBitmap);
             }
-            // QR phóng to trong dialog - live luôn
             if (qrDialog != null && qrDialog.isShowing() && qrDialogImageView != null) {
                 Bitmap big = encodeQr(text, 1024);
                 qrDialogImageView.setImageBitmap(big);
+                currentQrBitmap = big;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -445,27 +440,130 @@ public class TransactionDetailsActivity extends Activity {
         copy(buildLiveTxText());
     }
 
+    // --- QR dialog với Save / Share / Explore ---
     private void showQrDialog() {
         boolean dark = isDark();
+        int bgColor = dark ? Color.BLACK : Color.WHITE;
+        int fgColor = dark ? Color.WHITE : Color.BLACK;
+
         qrDialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(bgColor);
+        root.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+
         qrDialogImageView = new ImageView(this);
         qrDialogImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         qrDialogImageView.setPadding(48, 48, 48, 48);
-        qrDialogImageView.setBackgroundColor(dark ? Color.BLACK : Color.WHITE);
-        
-        qrDialog.setContentView(qrDialogImageView, new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
+        LinearLayout.LayoutParams imgLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
+        qrDialogImageView.setLayoutParams(imgLp);
         qrDialogImageView.setOnClickListener(v -> qrDialog.dismiss());
+        root.addView(qrDialogImageView);
+
+        // bottom action bar
+        LinearLayout bar = new LinearLayout(this);
+        bar.setOrientation(LinearLayout.HORIZONTAL);
+        bar.setGravity(Gravity.CENTER);
+        bar.setPadding(16, 24, 16, 48);
+        bar.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        bar.addView(makeActionButton(android.R.drawable.ic_menu_save, "Save", fgColor, v -> saveQrBitmap()));
+        bar.addView(makeActionButton(android.R.drawable.ic_menu_share, "Share", fgColor, v -> shareTx()));
+        bar.addView(makeActionButton(android.R.drawable.ic_menu_search, "Explore", fgColor, v -> exploreTx()));
+
+        root.addView(bar);
+        qrDialog.setContentView(root);
         qrDialog.setCancelable(true);
         qrDialog.setOnDismissListener(d -> {
             qrDialog = null;
             qrDialogImageView = null;
         });
         qrDialog.show();
-        
-        // render lần đầu
         updateLiveQr();
+    }
+
+    private LinearLayout makeActionButton(int iconRes, String label, int tint, android.view.View.OnClickListener onClick) {
+        LinearLayout col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        col.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        col.setLayoutParams(lp);
+        col.setClickable(true);
+        col.setOnClickListener(onClick);
+        col.setPadding(8, 8, 8, 8);
+
+        ImageView iv = new ImageView(this);
+        iv.setImageResource(iconRes);
+        iv.setColorFilter(tint);
+        LinearLayout.LayoutParams ivLp = new LinearLayout.LayoutParams(96, 96);
+        ivLp.gravity = Gravity.CENTER;
+        iv.setLayoutParams(ivLp);
+        col.addView(iv);
+
+        TextView tv = new TextView(this);
+        tv.setText(label);
+        tv.setTextColor(tint);
+        tv.setTextSize(12);
+        tv.setGravity(Gravity.CENTER);
+        col.addView(tv);
+        return col;
+    }
+
+    private void saveQrBitmap() {
+        try {
+            Bitmap bmp = currentQrBitmap;
+            if (bmp == null) {
+                bmp = encodeQr(buildLiveTxText(), 1024);
+            }
+            String filename = "tx_" + (tx != null ? tx.getTxId().toString().substring(0, 8) : "qr") + "_" + System.currentTimeMillis() + ".png";
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, filename);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/WalletQR");
+                values.put(MediaStore.Images.Media.IS_PENDING, 1);
+            }
+            Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            if (uri == null) { Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show(); return; }
+            try (OutputStream os = getContentResolver().openOutputStream(uri)) {
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, os);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.clear();
+                values.put(MediaStore.Images.Media.IS_PENDING, 0);
+                getContentResolver().update(uri, values, null, null);
+            }
+            Toast.makeText(this, "Saved to Pictures/WalletQR", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Save failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void shareTx() {
+        try {
+            String txid = tx != null ? tx.getTxId().toString() : getTv(tvTxid);
+            String shareText = buildLiveTxText() + "\n\nhttps://mempool.space/tx/" + txid;
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.setType("text/plain");
+            i.putExtra(Intent.EXTRA_TEXT, shareText);
+            startActivity(Intent.createChooser(i, "Share transaction"));
+        } catch (Exception ignored) {}
+    }
+
+    private void exploreTx() {
+        try {
+            String txid = tx != null ? tx.getTxId().toString() : getTv(tvTxid);
+            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("https://mempool.space/tx/" + txid));
+            startActivity(i);
+        } catch (Exception e) {
+            Toast.makeText(this, "No browser found", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public static Bitmap encodeQr(String text, int size) throws WriterException {
@@ -522,7 +620,6 @@ public class TransactionDetailsActivity extends Activity {
         }
         tvHeight.setText(confStr);
 
-        // QR update theo số confirmation mới
         updateLiveQr();
     }
     // ---------- END LIVE PATCH ----------
