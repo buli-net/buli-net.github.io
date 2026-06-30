@@ -10,11 +10,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -500,8 +502,10 @@ public class TransactionDetailsActivity extends Activity {
 
         ImageView iv = new ImageView(this);
         iv.setImageResource(iconRes);
-        iv.setColorFilter(tint);
-        LinearLayout.LayoutParams ivLp = new LinearLayout.LayoutParams(96, 96);
+        // ép tint full, icon hệ thống cũ mới trắng/đen đặc được
+        iv.setColorFilter(tint, PorterDuff.Mode.SRC_IN);
+        int iconSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36, getResources().getDisplayMetrics());
+        LinearLayout.LayoutParams ivLp = new LinearLayout.LayoutParams(iconSize, iconSize);
         ivLp.gravity = Gravity.CENTER;
         iv.setLayoutParams(ivLp);
         col.addView(iv);
@@ -509,8 +513,9 @@ public class TransactionDetailsActivity extends Activity {
         TextView tv = new TextView(this);
         tv.setText(label);
         tv.setTextColor(tint);
-        tv.setTextSize(12);
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         tv.setGravity(Gravity.CENTER);
+        tv.setPadding(0, 8, 0, 0);
         col.addView(tv);
         return col;
     }
