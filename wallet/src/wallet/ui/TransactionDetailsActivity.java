@@ -389,7 +389,13 @@ public class TransactionDetailsActivity extends Activity {
         } catch (Exception ignored) {}
     }
 
-    // ---------- QR live / copy full ----------
+    // ---------- QR live / copy full - dark theme aware ----------
+
+    private boolean isDark() {
+        return (getResources().getConfiguration().uiMode 
+            & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+            == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+    }
 
     private void setupQr() {
         if (ivQr != null) {
@@ -426,7 +432,7 @@ public class TransactionDetailsActivity extends Activity {
     private void updateLiveQr() {
         if (ivQr == null) return;
         try {
-            currentQrBitmap = encodeQr(buildLiveTxText(), 512);
+            currentQrBitmap = encodeQr(buildLiveTxText(), 512, isDark());
             ivQr.setImageBitmap(currentQrBitmap);
         } catch (Exception e) {
             e.printStackTrace();
@@ -438,12 +444,13 @@ public class TransactionDetailsActivity extends Activity {
     }
 
     private void showQrDialog(Bitmap qr) {
+        boolean dark = isDark();
         Dialog dialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         ImageView iv = new ImageView(this);
         iv.setImageBitmap(qr);
         iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
         iv.setPadding(48, 48, 48, 48);
-        iv.setBackgroundColor(Color.WHITE);
+        iv.setBackgroundColor(dark ? Color.BLACK : Color.WHITE);
         dialog.setContentView(iv, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
@@ -452,7 +459,9 @@ public class TransactionDetailsActivity extends Activity {
         dialog.show();
     }
 
-    public static Bitmap encodeQr(String text, int size) throws WriterException {
+    public static Bitmap encodeQr(String text, int size, boolean dark) throws WriterException {
+        int fg = dark ? Color.WHITE : Color.BLACK;
+        int bg = dark ? Color.BLACK : Color.WHITE;
         QRCodeWriter writer = new QRCodeWriter();
         BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, size, size);
         int w = bitMatrix.getWidth();
@@ -460,7 +469,7 @@ public class TransactionDetailsActivity extends Activity {
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
-                bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                bmp.setPixel(x, y, bitMatrix.get(x, y) ? fg : bg);
             }
         }
         return bmp;
