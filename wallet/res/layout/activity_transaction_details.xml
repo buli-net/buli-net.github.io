@@ -140,6 +140,9 @@
                     android:textColor="@color/tx_text_secondary"
                     android:textIsSelectable="true"
                     android:fontFamily="monospace"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="2dp"
+                    android:breakStrategy="simple"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="12dp"
                     android:layout_width="match_parent" android:layout_height="wrap_content"/>
@@ -155,6 +158,9 @@
                     android:textColor="@color/tx_text_secondary"
                     android:textIsSelectable="true"
                     android:fontFamily="monospace"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="2dp"
+                    android:breakStrategy="simple"
                     android:layout_marginTop="4dp"
                     android:layout_width="match_parent" android:layout_height="wrap_content"/>
             </LinearLayout>
