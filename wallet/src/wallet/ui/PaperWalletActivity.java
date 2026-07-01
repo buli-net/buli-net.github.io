@@ -30,6 +30,7 @@ import org.bitcoinj.core.NetworkParameters;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 import wallet.Constants;
 import wallet.R;
@@ -43,10 +44,12 @@ public class PaperWalletActivity extends AbstractWalletActivity {
     private TextView addressView, pubKeyView, privKeyView, addressTypeView;
     private Button toggleKeyButton;
     private boolean keyVisible = true;
+    private boolean privKeyHexMode = false;
 
     private String currentAddress = "";
     private String currentPubKey = "";
-    private String currentPrivKey = "";
+    private String currentPrivKeyWif = "";
+    private String currentPrivKeyHex = "";
 
     private ScriptType addressType = ScriptType.P2WPKH;
 
@@ -75,13 +78,26 @@ public class PaperWalletActivity extends AbstractWalletActivity {
 
         findViewById(R.id.paper_wallet_copy_address).setOnClickListener(v -> copyText("Address", currentAddress));
         findViewById(R.id.paper_wallet_copy_pubkey).setOnClickListener(v -> copyText("Public key", currentPubKey));
-        findViewById(R.id.paper_wallet_copy_privkey).setOnClickListener(v -> copyText("Private key", currentPrivKey));
+        findViewById(R.id.paper_wallet_copy_privkey).setOnClickListener(v -> copyText("Private key", privKeyHexMode ? currentPrivKeyHex : currentPrivKeyWif));
+
+        // bấm vào private key để đổi WIF / HEX
+        privKeyView.setOnClickListener(v -> {
+            if (!keyVisible) return;
+            privKeyHexMode = !privKeyHexMode;
+            updatePrivKeyView();
+            Toast.makeText(this, privKeyHexMode ? "Private key: HEX" : "Private key: WIF", Toast.LENGTH_SHORT).show();
+        });
 
         toggleKeyButton = findViewById(R.id.paper_wallet_toggle_key);
         toggleKeyButton.setOnClickListener(v -> toggleKeyVisibility());
 
         findViewById(R.id.paper_wallet_generate).setOnClickListener(v -> generateNew());
-        findViewById(R.id.paper_wallet_save).setOnClickListener(v -> savePaperWallet());
+        
+        View saveBtn = findViewById(R.id.paper_wallet_save);
+        saveBtn.setOnClickListener(v -> savePaperWallet());
+        // long-press SAVE để export txt
+        saveBtn.setOnLongClickListener(v -> { exportWalletTxt(); return true; });
+
         findViewById(R.id.paper_wallet_share).setOnClickListener(v -> sharePaperWallet());
         
         View printBtn = findViewById(R.id.paper_wallet_print);
@@ -119,7 +135,9 @@ public class PaperWalletActivity extends AbstractWalletActivity {
 
         currentAddress = key.toAddress(addressType, network).toString();
         currentPubKey = key.getPublicKeyAsHex();
-        currentPrivKey = key.getPrivateKeyAsWiF(network);
+        currentPrivKeyWif = key.getPrivateKeyAsWiF(network);
+        currentPrivKeyHex = key.getPrivateKeyAsHex();
+        privKeyHexMode = false;
 
         addressView.setText(currentAddress);
         pubKeyView.setText(currentPubKey);
@@ -133,14 +151,15 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         }
 
         qrAddressView.setImageBitmap(makeQr(currentAddress));
-        qrKeyView.setImageBitmap(makeQr(currentPrivKey));
+        // QR private key luôn là WIF để quét được
+        qrKeyView.setImageBitmap(makeQr(currentPrivKeyWif));
 
         Toast.makeText(this, R.string.paper_wallet_generated, Toast.LENGTH_SHORT).show();
     }
 
     private void updatePrivKeyView() {
         if (keyVisible) {
-            privKeyView.setText(currentPrivKey);
+            privKeyView.setText(privKeyHexMode ? currentPrivKeyHex : currentPrivKeyWif);
             toggleKeyButton.setText(R.string.paper_wallet_hide_key);
         } else {
             privKeyView.setText("••••••••••••••••••••••••");
@@ -193,6 +212,32 @@ public class PaperWalletActivity extends AbstractWalletActivity {
             Toast.makeText(this, "Saved to Pictures/PaperWallet/" + filename, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             Toast.makeText(this, "Save failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void exportWalletTxt() {
+        try {
+            String typeName = (addressType == ScriptType.P2PKH) ? "Legacy P2PKH" : "SegWit bech32";
+            String content = "Paper Wallet\n"
+                + "Type: " + typeName + "\n"
+                + "Address: " + currentAddress + "\n"
+                + "Public key: " + currentPubKey + "\n"
+                + "Private key WIF: " + currentPrivKeyWif + "\n"
+                + "Private key HEX: " + currentPrivKeyHex + "\n";
+
+            String filename = "paperwallet_" + System.currentTimeMillis() + ".txt";
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Files.FileColumns.DISPLAY_NAME, filename);
+            values.put(MediaStore.Files.FileColumns.MIME_TYPE, "text/plain");
+            values.put(MediaStore.Files.FileColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/PaperWallet");
+
+            Uri uri = getContentResolver().insert(MediaStore.Files.getContentUri("external"), values);
+            try (OutputStream out = getContentResolver().openOutputStream(uri)) {
+                out.write(content.getBytes(StandardCharsets.UTF_8));
+            }
+            Toast.makeText(this, "Exported to Documents/PaperWallet/" + filename, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
