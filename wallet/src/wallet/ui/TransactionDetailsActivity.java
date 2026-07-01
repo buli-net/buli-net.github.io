@@ -14,6 +14,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -58,6 +60,8 @@ import wallet.WalletApplication;
 public class TransactionDetailsActivity extends Activity {
     // Main amount / status views
     private TextView tvDirection, tvAmount, tvStatus, tvFee, tvTime, tvHeight, tvMeta, tvTxid;
+    // Age view - time elapsed since transaction
+    private TextView tvAge;
     // Full input/output list views
     private TextView tvFrom, tvTo;
     // Actual counterparty sender/receiver views (single address)
@@ -86,6 +90,16 @@ public class TransactionDetailsActivity extends Activity {
     private ImageView qrDialogImageView;
     // --- END QR DIALOG LIVE PATCH ---
 
+    // Age ticker - updates the Age field every second
+    private final Handler ageHandler = new Handler(Looper.getMainLooper());
+    private final Runnable ageRunnable = new Runnable() {
+        @Override
+        public void run() {
+            refreshLiveFields();
+            ageHandler.postDelayed(this, 1000);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,6 +121,7 @@ public class TransactionDetailsActivity extends Activity {
         tvHeight = findViewById(R.id.tv_height);
         tvMeta = findViewById(R.id.tv_meta);
         tvTxid = findViewById(R.id.tv_txid);
+        tvAge = findViewById(R.id.tv_age);
         tvFrom = findViewById(R.id.tv_from);
         tvTo = findViewById(R.id.tv_to);
         tvActualFrom = findViewById(R.id.tv_actual_from);
@@ -120,6 +135,7 @@ public class TransactionDetailsActivity extends Activity {
         if (tvTime != null) { tvTime.setGravity(Gravity.END); tvTime.setTextAlignment(TextView.TEXT_ALIGNMENT_VIEW_END); }
         if (tvHeight != null) { tvHeight.setGravity(Gravity.END); tvHeight.setTextAlignment(TextView.TEXT_ALIGNMENT_VIEW_END); }
         if (tvMeta != null) { tvMeta.setGravity(Gravity.END); tvMeta.setTextAlignment(TextView.TEXT_ALIGNMENT_VIEW_END); }
+        if (tvAge != null) { tvAge.setGravity(Gravity.END); tvAge.setTextAlignment(TextView.TEXT_ALIGNMENT_VIEW_END); }
 
         // Get transaction hash from intent
         String txidStr = getIntent().getStringExtra("txid");
@@ -289,6 +305,7 @@ public class TransactionDetailsActivity extends Activity {
             tx.getConfidence().addEventListener(confidenceListener);
         }
         refreshLiveFields();
+        ageHandler.post(ageRunnable);
     }
 
     @Override
@@ -297,6 +314,7 @@ public class TransactionDetailsActivity extends Activity {
         if (tx != null && tx.getConfidence() != null) {
             tx.getConfidence().removeEventListener(confidenceListener);
         }
+        ageHandler.removeCallbacks(ageRunnable);
     }
 
     @Override
@@ -407,6 +425,7 @@ public class TransactionDetailsActivity extends Activity {
     }
 
     private String buildLiveTxText() {
+        String ageStr = tvAge != null && tvAge.getText() != null ? tvAge.getText().toString() : "";
         return "Direction: " + getTv(tvDirection) + "\n"
                 + "Amount: " + getTv(tvAmount) + "\n\n"
                 + "Sender / Receiver\n"
@@ -417,7 +436,8 @@ public class TransactionDetailsActivity extends Activity {
                 + "Fee: " + getTv(tvFee) + "\n"
                 + "Size / Weight: " + getTv(tvMeta) + "\n"
                 + "Confirmations: " + getTv(tvHeight) + "\n"
-                + "Time: " + getTv(tvTime) + "\n\n"
+                + "Time: " + getTv(tvTime) + "\n"
+                + "Age: " + ageStr + "\n\n"
                 + "Sent Details\n" + getTv(tvFrom) + "\n\n"
                 + "Received Details\n" + getTv(tvTo) + "\n\n"
                 + "Transaction ID\n" + getTv(tvTxid);
@@ -521,7 +541,6 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
         col.setPadding(8, 8, 8, 8);
 
         ImageView iv = new ImageView(this);
-        // default system icon color
         iv.setImageResource(iconRes);
         int iconSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36, getResources().getDisplayMetrics());
         LinearLayout.LayoutParams ivLp = new LinearLayout.LayoutParams(iconSize, iconSize);
@@ -531,7 +550,6 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
 
         TextView tv = new TextView(this);
         tv.setText(label);
-        // gray text matching system icon tone
         tv.setTextColor(dark ? 0xFFBBBBBB : 0xFF666666);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         tv.setGravity(Gravity.CENTER);
@@ -605,6 +623,33 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
         return bmp;
     }
 
+    // Format elapsed time as years/months/days/hours/minutes/seconds ago
+    private String formatAge(Date txTime) {
+        if (txTime == null) return "—";
+        long diffSec = (System.currentTimeMillis() - txTime.getTime()) / 1000;
+        if (diffSec < 0) diffSec = 0;
+
+        long years = diffSec / (365L * 24 * 3600);
+        diffSec %= 365L * 24 * 3600;
+        long months = diffSec / (30L * 24 * 3600);
+        diffSec %= 30L * 24 * 3600;
+        long days = diffSec / (24 * 3600);
+        diffSec %= 24 * 3600;
+        long hours = diffSec / 3600;
+        diffSec %= 3600;
+        long minutes = diffSec / 60;
+        long seconds = diffSec % 60;
+
+        StringBuilder sb = new StringBuilder();
+        if (years > 0) sb.append(years).append("y ");
+        if (months > 0) sb.append(months).append("mo ");
+        if (days > 0) sb.append(days).append("d ");
+        if (hours > 0 || sb.length() > 0) sb.append(hours).append("h ");
+        if (minutes > 0 || sb.length() > 0) sb.append(minutes).append("m ");
+        sb.append(seconds).append("s ago");
+        return sb.toString().trim();
+    }
+
     // ---------- LIVE PATCH: refresh status/conf + QR ----------
     private void refreshLiveFields() {
         if (tx == null || tvStatus == null || tvHeight == null) return;
@@ -644,6 +689,13 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
             confStr += " · height " + height;
         }
         tvHeight.setText(confStr);
+
+        // Update Age field
+        if (tvAge != null) {
+            Date updateTime = null;
+            try { updateTime = tx.getUpdateTime(); } catch (Exception ignored) {}
+            tvAge.setText(formatAge(updateTime));
+        }
 
         updateLiveQr();
     }
