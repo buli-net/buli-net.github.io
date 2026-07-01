@@ -14,6 +14,8 @@ import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,10 +29,17 @@ import org.bitcoinj.base.ScriptType;
 import org.bitcoinj.base.BitcoinNetwork;
 import org.bitcoinj.core.NetworkParameters;
 
+// BIP38 - có sẵn trong bitcoinj 0.16+
+// Nếu bản bitcoinj của bạn cũ hơn, thêm:
+// implementation 'org.bitcoinj:bitcoinj-core:0.16.2'
+import org.bitcoinj.crypto.BIP38PrivateKey;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import wallet.Constants;
 import wallet.R;
@@ -42,16 +51,23 @@ public class PaperWalletActivity extends AbstractWalletActivity {
     private View cardView;
     private ImageView qrAddressView, qrKeyView;
     private TextView addressView, pubKeyView, privKeyView, addressTypeView, privKeyLabelView;
-    private Button toggleKeyButton, privKeyFormatBtn, exportTxtBtn;
+    private Button toggleKeyButton, privKeyFormatBtn, exportTxtBtn, generateBtn;
+    private CheckBox encryptToggle;
+    private EditText passView, passConfirmView;
+    private TextView bip38HintView;
+
     private boolean keyVisible = true;
     private boolean privKeyHexMode = false;
+    private boolean bip38Mode = false;
 
     private String currentAddress = "";
     private String currentPubKey = "";
     private String currentPrivKeyWif = "";
     private String currentPrivKeyHex = "";
+    private String currentPrivKeyBip38 = "";
 
     private ScriptType addressType = ScriptType.P2WPKH;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private String getFileProviderAuthority() {
         return getPackageName() + ".file_attachment";
@@ -74,12 +90,21 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         addressTypeView = findViewById(R.id.paper_wallet_address_type);
         privKeyLabelView = findViewById(R.id.paper_wallet_key_label);
 
+        encryptToggle = findViewById(R.id.paper_wallet_encrypt_toggle);
+        passView = findViewById(R.id.paper_wallet_passphrase);
+        passConfirmView = findViewById(R.id.paper_wallet_passphrase_confirm);
+        bip38HintView = findViewById(R.id.paper_wallet_bip38_hint);
+        generateBtn = findViewById(R.id.paper_wallet_generate);
+
         if (qrAddressView != null) qrAddressView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         if (qrKeyView != null) qrKeyView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
         findViewById(R.id.paper_wallet_copy_address).setOnClickListener(v -> copyText("Address", currentAddress));
         findViewById(R.id.paper_wallet_copy_pubkey).setOnClickListener(v -> copyText("Public key", currentPubKey));
-        findViewById(R.id.paper_wallet_copy_privkey).setOnClickListener(v -> copyText("Private key", privKeyHexMode ? currentPrivKeyHex : currentPrivKeyWif));
+        findViewById(R.id.paper_wallet_copy_privkey).setOnClickListener(v -> {
+            String key = bip38Mode ? currentPrivKeyBip38 : (privKeyHexMode ? currentPrivKeyHex : currentPrivKeyWif);
+            copyText("Private key", key);
+        });
 
         privKeyView.setOnClickListener(v -> togglePrivKeyFormat());
 
@@ -91,7 +116,17 @@ public class PaperWalletActivity extends AbstractWalletActivity {
             privKeyFormatBtn.setOnClickListener(v -> togglePrivKeyFormat());
         }
 
-        findViewById(R.id.paper_wallet_generate).setOnClickListener(v -> generateNew());
+        encryptToggle.setOnCheckedChangeListener((b, checked) -> {
+            int vis = checked ? View.VISIBLE : View.GONE;
+            passView.setVisibility(vis);
+            passView.setEnabled(checked);
+            passConfirmView.setVisibility(vis);
+            passConfirmView.setEnabled(checked);
+            bip38HintView.setVisibility(vis);
+            updatePrivKeyView();
+        });
+
+        generateBtn.setOnClickListener(v -> generateNew());
 
         View saveBtn = findViewById(R.id.paper_wallet_save);
         saveBtn.setOnClickListener(v -> savePaperWallet());
@@ -101,7 +136,6 @@ public class PaperWalletActivity extends AbstractWalletActivity {
 
         View printBtn = findViewById(R.id.paper_wallet_print);
         if (printBtn != null) {
-            printBtn.setVisibility(View.VISIBLE);
             printBtn.setOnClickListener(v -> printPaperWallet());
         }
 
@@ -135,6 +169,22 @@ public class PaperWalletActivity extends AbstractWalletActivity {
 
     private void generateNew() {
         final Network network = getNetwork();
+        final boolean doBip38 = encryptToggle != null && encryptToggle.isChecked();
+        String p1 = passView != null ? passView.getText().toString() : "";
+        String p2 = passConfirmView != null ? passConfirmView.getText().toString() : "";
+
+        if (doBip38) {
+            if (p1.isEmpty()) {
+                Toast.makeText(this, "Nhập passphrase cho BIP38", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!p1.equals(p2)) {
+                Toast.makeText(this, "Passphrase không khớp", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        generateBtn.setEnabled(false);
         final ECKey key = new ECKey();
 
         currentAddress = key.toAddress(addressType, network).toString();
@@ -142,6 +192,7 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         currentPrivKeyWif = key.getPrivateKeyAsWiF(network);
         currentPrivKeyHex = key.getPrivateKeyAsHex();
         privKeyHexMode = false;
+        bip38Mode = false;
 
         addressView.setText(currentAddress);
         pubKeyView.setText(currentPubKey);
@@ -155,25 +206,72 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         }
 
         qrAddressView.setImageBitmap(makeQr(currentAddress));
-        // QR key sẽ được update trong updatePrivKeyView()
-        Toast.makeText(this, R.string.paper_wallet_generated, Toast.LENGTH_SHORT).show();
+
+        if (!doBip38) {
+            qrKeyView.setImageBitmap(makeQr(currentPrivKeyWif));
+            generateBtn.setEnabled(true);
+            Toast.makeText(this, R.string.paper_wallet_generated, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // BIP38 encrypt off UI thread - scrypt nặng
+        final String passphrase = p1;
+        final ECKey keyFinal = key;
+        Toast.makeText(this, "Encrypting BIP38...", Toast.LENGTH_SHORT).show();
+        executor.execute(() -> {
+            try {
+                // API bitcoinj: BIP38PrivateKey.encrypt(...)
+                // Nếu bản bitcoinj của bạn khác API, sửa 1 dòng này thôi
+                BIP38PrivateKey bip38 = BIP38PrivateKey.encrypt(
+                    network == BitcoinNetwork.MAINNET,
+                    keyFinal.getPrivKey(),
+                    keyFinal.isCompressed(),
+                    passphrase
+                );
+                currentPrivKeyBip38 = bip38.toString();
+                bip38Mode = true;
+                runOnUiThread(() -> {
+                    updatePrivKeyView();
+                    generateBtn.setEnabled(true);
+                    Toast.makeText(this, "Paper wallet BIP38 ready", Toast.LENGTH_SHORT).show();
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    generateBtn.setEnabled(true);
+                    Toast.makeText(this, "BIP38 encrypt failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            }
+        });
     }
 
     private void updatePrivKeyView() {
-        String baseLabel = getString(R.string.paper_wallet_key_label);
+        String base = getString(R.string.paper_wallet_key_label);
+        base = base.replaceAll("\\s*\\((WIF|HEX|BIP38)\\)\\s*$", "").trim();
+
+        String displayKey;
+        String suffix;
+        if (bip38Mode && !currentPrivKeyBip38.isEmpty()) {
+            displayKey = currentPrivKeyBip38;
+            suffix = " (BIP38)";
+        } else {
+            displayKey = privKeyHexMode ? currentPrivKeyHex : currentPrivKeyWif;
+            suffix = privKeyHexMode ? " (HEX)" : " (WIF)";
+        }
+
         if (keyVisible) {
-            String keyText = privKeyHexMode ? currentPrivKeyHex : currentPrivKeyWif;
-            privKeyView.setText(keyText);
+            privKeyView.setText(displayKey);
             toggleKeyButton.setText(R.string.paper_wallet_hide_key);
-            if (privKeyFormatBtn != null) privKeyFormatBtn.setText(privKeyHexMode ? "HEX" : "WIF");
-            if (privKeyLabelView != null) privKeyLabelView.setText(baseLabel + (privKeyHexMode ? " (HEX)" : " (WIF)"));
-            // QR đổi theo WIF/HEX
-            if (qrKeyView != null) qrKeyView.setImageBitmap(makeQr(keyText));
+            if (privKeyFormatBtn != null) {
+                privKeyFormatBtn.setEnabled(!bip38Mode);
+                privKeyFormatBtn.setText(bip38Mode ? "BIP38" : (privKeyHexMode ? "HEX" : "WIF"));
+                privKeyFormatBtn.setAlpha(bip38Mode ? 0.5f : 1.0f);
+            }
+            if (privKeyLabelView != null) privKeyLabelView.setText(base + suffix);
+            if (qrKeyView != null && !displayKey.isEmpty()) qrKeyView.setImageBitmap(makeQr(displayKey));
         } else {
             privKeyView.setText("••••••••••••••••••••••••");
             toggleKeyButton.setText(R.string.paper_wallet_show_key);
-            if (privKeyLabelView != null) privKeyLabelView.setText(baseLabel);
-            // khi ẩn key thì không đổi QR, giữ nguyên để khỏi lộ
+            if (privKeyLabelView != null) privKeyLabelView.setText(base);
         }
     }
 
@@ -183,7 +281,7 @@ public class PaperWalletActivity extends AbstractWalletActivity {
     }
 
     private void togglePrivKeyFormat() {
-        if (!keyVisible) return;
+        if (!keyVisible || bip38Mode) return;
         privKeyHexMode = !privKeyHexMode;
         updatePrivKeyView();
         Toast.makeText(this, privKeyHexMode ? "Private key: HEX" : "Private key: WIF", Toast.LENGTH_SHORT).show();
@@ -199,7 +297,10 @@ public class PaperWalletActivity extends AbstractWalletActivity {
     private Bitmap buildPrintBitmap() {
         View printView = getLayoutInflater().inflate(R.layout.paper_wallet_print, null);
         
-        String privKeyForPrint = privKeyHexMode ? currentPrivKeyHex : currentPrivKeyWif;
+        String privKeyForPrint = bip38Mode && !currentPrivKeyBip38.isEmpty()
+            ? currentPrivKeyBip38
+            : (privKeyHexMode ? currentPrivKeyHex : currentPrivKeyWif);
+
         ((TextView) printView.findViewById(R.id.print_address)).setText(currentAddress);
         ((TextView) printView.findViewById(R.id.print_pubkey)).setText(currentPubKey);
         ((TextView) printView.findViewById(R.id.print_privkey)).setText(privKeyForPrint);
@@ -209,10 +310,10 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         ((ImageView) printView.findViewById(R.id.print_qr_address)).setImageBitmap(makeQr(currentAddress));
         ((ImageView) printView.findViewById(R.id.print_qr_key)).setImageBitmap(makeQr(privKeyForPrint));
 
-        // update label private key trong bản in
-        View privLabel = printView.findViewWithTag("print_privkey_label");
-        if (privLabel instanceof TextView) {
-            ((TextView) privLabel).setText("Private key" + (privKeyHexMode ? " (HEX)" : " (WIF)"));
+        TextView printPrivLabel = printView.findViewWithTag("print_privkey_label");
+        if (printPrivLabel != null) {
+            String s = "Private key" + (bip38Mode ? " (BIP38)" : (privKeyHexMode ? " (HEX)" : " (WIF)"));
+            printPrivLabel.setText(s);
         }
 
         int widthSpec = View.MeasureSpec.makeMeasureSpec(720, View.MeasureSpec.EXACTLY);
@@ -260,12 +361,17 @@ public class PaperWalletActivity extends AbstractWalletActivity {
     private void exportWalletTxt() {
         try {
             String typeName = (addressType == ScriptType.P2PKH) ? "Legacy P2PKH" : "SegWit bech32";
-            String content = "Paper Wallet\n"
-                + "Type: " + typeName + "\n"
-                + "Address: " + currentAddress + "\n"
-                + "Public key: " + currentPubKey + "\n"
-                + "Private key WIF: " + currentPrivKeyWif + "\n"
-                + "Private key HEX: " + currentPrivKeyHex + "\n";
+            StringBuilder sb = new StringBuilder();
+            sb.append("Paper Wallet\n");
+            sb.append("Type: ").append(typeName).append("\n");
+            sb.append("Address: ").append(currentAddress).append("\n");
+            sb.append("Public key: ").append(currentPubKey).append("\n");
+            sb.append("Private key WIF: ").append(currentPrivKeyWif).append("\n");
+            sb.append("Private key HEX: ").append(currentPrivKeyHex).append("\n");
+            if (bip38Mode && !currentPrivKeyBip38.isEmpty()) {
+                sb.append("Private key BIP38: ").append(currentPrivKeyBip38).append("\n");
+                sb.append("WARNING: BIP38 encrypted - passphrase required to spend\n");
+            }
 
             String filename = "paperwallet_" + System.currentTimeMillis() + ".txt";
             ContentValues values = new ContentValues();
@@ -275,7 +381,7 @@ public class PaperWalletActivity extends AbstractWalletActivity {
 
             Uri uri = getContentResolver().insert(MediaStore.Files.getContentUri("external"), values);
             try (OutputStream out = getContentResolver().openOutputStream(uri)) {
-                out.write(content.getBytes(StandardCharsets.UTF_8));
+                out.write(sb.toString().getBytes(StandardCharsets.UTF_8));
             }
             Toast.makeText(this, "Exported to Documents/PaperWallet/" + filename, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
@@ -314,5 +420,11 @@ public class PaperWalletActivity extends AbstractWalletActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executor.shutdownNow();
     }
 }
