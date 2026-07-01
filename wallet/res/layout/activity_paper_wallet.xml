@@ -42,6 +42,19 @@
             android:gravity="center"
             android:layout_marginTop="8dp" />
 
+        <!-- CHÈN THÊM: chọn kiểu địa chỉ -->
+        <TextView
+            android:id="@+id/paper_wallet_address_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorSecondary"
+            android:paddingTop="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="SegWit bech32" />
+
         <Button
             android:id="@+id/paper_wallet_copy_address"
             style="?android:attr/buttonBarButtonStyle"
