@@ -6,6 +6,7 @@
     <cache-path
         name="report"
         path="report/" />
+    <!-- add create paper wallet -->
     <cache-path 
         name="paperwallet" 
         path="paperwallet/" />
