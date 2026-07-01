@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Paper Wallet creation screen -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,6 +12,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Security warning banner -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -19,6 +21,7 @@
             android:textColor="?android:attr/textColorSecondary"
             android:layout_marginBottom="16dp" />
 
+        <!-- ========== Public / Address section ========== -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -26,6 +29,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorPrimary" />
 
+        <!-- QR code for the receive address -->
         <ImageView
             android:id="@+id/paper_wallet_qr_address"
             android:layout_width="200dp"
@@ -35,6 +39,7 @@
             android:background="#ffffff"
             android:padding="8dp" />
 
+        <!-- Text representation of the address -->
         <TextView
             android:id="@+id/paper_wallet_address"
             android:layout_width="match_parent"
@@ -44,6 +49,7 @@
             android:gravity="center"
             android:layout_marginTop="8dp" />
 
+        <!-- Tap to switch address type (e.g. SegWit bech32) -->
         <TextView
             android:id="@+id/paper_wallet_address_type"
             android:layout_width="wrap_content"
@@ -63,6 +69,7 @@
             android:layout_height="wrap_content"
             android:text="@string/paper_wallet_copy" />
 
+        <!-- Public key (hex) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -86,7 +93,7 @@
             android:layout_height="wrap_content"
             android:text="@string/paper_wallet_copy" />
 
-        <!-- divider giữa 2 phần QR -->
+        <!-- Divider between public and private sections -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -94,6 +101,7 @@
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp" />
 
+        <!-- ========== Private key section ========== -->
         <TextView
             android:id="@+id/paper_wallet_key_label"
             android:layout_width="wrap_content"
@@ -102,6 +110,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorPrimary" />
 
+        <!-- QR code for the private key (WIF or BIP38) -->
         <ImageView
             android:id="@+id/paper_wallet_qr_key"
             android:layout_width="200dp"
@@ -111,6 +120,7 @@
             android:background="#ffffff"
             android:padding="8dp" />
 
+        <!-- Text representation of the private key -->
         <TextView
             android:id="@+id/paper_wallet_key"
             android:layout_width="match_parent"
@@ -120,6 +130,7 @@
             android:gravity="center"
             android:layout_marginTop="8dp" />
 
+        <!-- Private key actions: Copy / Format toggle / Hide -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -150,12 +161,12 @@
                 android:text="@string/paper_wallet_hide_key" />
         </LinearLayout>
 
-        <!-- BIP38 passphrase -->
+        <!-- ========== BIP38 encryption options ========== -->
         <CheckBox
             android:id="@+id/paper_wallet_encrypt_toggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mã hóa BIP38"
+            android:text="@string/paper_wallet_encrypt_bip38"
             android:textColor="?android:attr/textColorPrimary"
             android:layout_marginTop="12dp" />
 
@@ -163,7 +174,7 @@
             android:id="@+id/paper_wallet_passphrase"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Passphrase"
+            android:hint="@string/paper_wallet_passphrase"
             android:inputType="textPassword"
             android:enabled="false"
             android:visibility="gone" />
@@ -172,7 +183,7 @@
             android:id="@+id/paper_wallet_passphrase_confirm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nhập lại passphrase"
+            android:hint="@string/paper_wallet_passphrase_confirm"
             android:inputType="textPassword"
             android:enabled="false"
             android:visibility="gone" />
@@ -181,11 +192,12 @@
             android:id="@+id/paper_wallet_bip38_hint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Mất passphrase = mất tiền. Chỉ quét được ở ví hỗ trợ BIP38."
+            android:text="@string/paper_wallet_bip38_hint"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
             android:visibility="gone" />
 
+        <!-- Divider before action buttons -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -193,6 +205,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp" />
 
+        <!-- ========== Action buttons ========== -->
         <Button
             android:id="@+id/paper_wallet_generate"
             android:layout_width="match_parent"
@@ -234,7 +247,7 @@
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Export TXT" />
+            android:text="@string/paper_wallet_export_txt" />
 
     </LinearLayout>
 </ScrollView>
