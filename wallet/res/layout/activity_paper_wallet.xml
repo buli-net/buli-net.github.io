@@ -86,14 +86,21 @@
             android:layout_height="wrap_content"
             android:text="@string/paper_wallet_copy" />
 
+        <!-- divider giữa 2 phần QR -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp" />
+
         <TextView
             android:id="@+id/paper_wallet_key_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/paper_wallet_key_label"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorPrimary"
-            android:layout_marginTop="12dp" />
+            android:textColor="?android:attr/textColorPrimary" />
 
         <ImageView
             android:id="@+id/paper_wallet_qr_key"
