@@ -150,6 +150,42 @@
                 android:text="@string/paper_wallet_hide_key" />
         </LinearLayout>
 
+        <!-- BIP38 passphrase -->
+        <CheckBox
+            android:id="@+id/paper_wallet_encrypt_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mã hóa BIP38"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/paper_wallet_passphrase"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Passphrase"
+            android:inputType="textPassword"
+            android:enabled="false"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/paper_wallet_passphrase_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nhập lại passphrase"
+            android:inputType="textPassword"
+            android:enabled="false"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/paper_wallet_bip38_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mất passphrase = mất tiền. Chỉ quét được ở ví hỗ trợ BIP38."
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorSecondary"
+            android:visibility="gone" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
