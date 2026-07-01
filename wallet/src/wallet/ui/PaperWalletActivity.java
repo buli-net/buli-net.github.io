@@ -81,7 +81,6 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         findViewById(R.id.paper_wallet_copy_pubkey).setOnClickListener(v -> copyText("Public key", currentPubKey));
         findViewById(R.id.paper_wallet_copy_privkey).setOnClickListener(v -> copyText("Private key", privKeyHexMode ? currentPrivKeyHex : currentPrivKeyWif));
 
-        // tap private key để đổi WIF/HEX luôn cho nhanh
         privKeyView.setOnClickListener(v -> togglePrivKeyFormat());
 
         toggleKeyButton = findViewById(R.id.paper_wallet_toggle_key);
@@ -195,10 +194,28 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         Toast.makeText(this, label + " copied", Toast.LENGTH_SHORT).show();
     }
 
-    private Bitmap renderCard() {
-        Bitmap bitmap = Bitmap.createBitmap(cardView.getWidth(), cardView.getHeight(), Bitmap.Config.ARGB_8888);
+    // render cho in / share / save - nền trắng chữ đen
+    private Bitmap buildPrintBitmap() {
+        View printView = getLayoutInflater().inflate(R.layout.paper_wallet_print, null);
+        
+        ((TextView) printView.findViewById(R.id.print_address)).setText(currentAddress);
+        ((TextView) printView.findViewById(R.id.print_pubkey)).setText(currentPubKey);
+        ((TextView) printView.findViewById(R.id.print_privkey)).setText(privKeyHexMode ? currentPrivKeyHex : currentPrivKeyWif);
+        ((TextView) printView.findViewById(R.id.print_address_type)).setText(
+            addressType == ScriptType.P2PKH ? "Legacy P2PKH" : "SegWit bech32"
+        );
+        ((ImageView) printView.findViewById(R.id.print_qr_address)).setImageBitmap(makeQr(currentAddress));
+        ((ImageView) printView.findViewById(R.id.print_qr_key)).setImageBitmap(makeQr(currentPrivKeyWif));
+
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(720, View.MeasureSpec.EXACTLY);
+        int heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        printView.measure(widthSpec, heightSpec);
+        printView.layout(0, 0, printView.getMeasuredWidth(), printView.getMeasuredHeight());
+
+        Bitmap bitmap = Bitmap.createBitmap(printView.getMeasuredWidth(), printView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        cardView.draw(canvas);
+        canvas.drawColor(0xFFFFFFFF);
+        printView.draw(canvas);
         return bitmap;
     }
 
@@ -207,14 +224,14 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         dir.mkdirs();
         File file = new File(dir, "paperwallet_" + System.currentTimeMillis() + ".png");
         try (FileOutputStream out = new FileOutputStream(file)) {
-            renderCard().compress(Bitmap.CompressFormat.PNG, 100, out);
+            buildPrintBitmap().compress(Bitmap.CompressFormat.PNG, 100, out);
         }
         return file;
     }
 
     private void savePaperWallet() {
         try {
-            Bitmap bitmap = renderCard();
+            Bitmap bitmap = buildPrintBitmap();
             String filename = "paperwallet_" + System.currentTimeMillis() + ".png";
             
             ContentValues values = new ContentValues();
@@ -276,7 +293,7 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         try {
             PrintHelper helper = new PrintHelper(this);
             helper.setScaleMode(PrintHelper.SCALE_MODE_FIT);
-            helper.printBitmap("Paper Wallet - " + currentAddress, renderCard());
+            helper.printBitmap("Paper Wallet - " + currentAddress, buildPrintBitmap());
         } catch (Exception e) {
             Toast.makeText(this, "Print failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
