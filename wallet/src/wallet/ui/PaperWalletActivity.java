@@ -17,13 +17,8 @@ import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
-// --- ECKey import cho buli-net v11.04 ---
-// Nếu vẫn báo đỏ, mở SweepWalletActivity.java xem nó import ECKey từ đâu, copy y chang dòng đó vào đây
-import org.bitcoinj.crypto.ECKey;  // thử cái này trước
-// import org.bitcoinj.core.ECKey; // bản Schildbach cũ
-
-import org.bitcoinj.base.Address;
-import org.bitcoinj.base.Network;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -69,7 +64,6 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         findViewById(R.id.paper_wallet_save).setOnClickListener(v -> savePaperWallet());
         findViewById(R.id.paper_wallet_share).setOnClickListener(v -> sharePaperWallet());
         
-        // Nút Print tạm ẩn, vì chưa có androidx.print
         View printBtn = findViewById(R.id.paper_wallet_print);
         if (printBtn != null) printBtn.setVisibility(View.GONE);
 
@@ -77,13 +71,12 @@ public class PaperWalletActivity extends AbstractWalletActivity {
     }
 
     private void generateNew() {
-        final Network network = Constants.NETWORK;
+        final NetworkParameters params = Constants.NETWORK_PARAMETERS;
         final ECKey key = new ECKey();
-        final Address address = key.getAddress(network);
 
-        currentAddress = address.toString();
+        currentAddress = key.toAddress(params).toString();
         currentPubKey = key.getPublicKeyAsHex();
-        currentPrivKey = key.getPrivateKeyAsEncoded(network).toString();
+        currentPrivKey = key.getPrivateKeyEncoded(params).toString();
 
         addressView.setText(currentAddress);
         pubKeyView.setText(currentPubKey);
