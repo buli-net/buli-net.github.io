@@ -4,7 +4,7 @@ v11.04 mod by buli
 
 + Fix theme ui setting bug light/dark
 
-- wallet/AndroidManifest.xml [ add line 186, // line 187->188 ]
+- wallet/AndroidManifest.xml [ add line 204, <!-- line 205->206 --> ]
 - wallet/res/values-night/styles.xml [ add code line 56->87 ]
 - wallet/res/values/styles.xml [ add code line 130->161 ]
 - wallet/res/values/colors.xml [ add code line 20 --> 22 ]
