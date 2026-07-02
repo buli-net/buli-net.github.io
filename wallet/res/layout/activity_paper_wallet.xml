@@ -240,7 +240,8 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="@string/paper_wallet_print" />
-   <!--     </LinearLayout> -->
+            
+        </LinearLayout> 
 
         <Button
             android:id="@+id/paper_wallet_export_txt"
@@ -249,6 +250,6 @@
             android:layout_height="wrap_content"
             android:text="@string/paper_wallet_export_txt" />
 
- <!--   </LinearLayout> -->
+    </LinearLayout> 
         
 </ScrollView>
