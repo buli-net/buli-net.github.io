@@ -241,7 +241,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/paper_wallet_print" />
         </LinearLayout>
-
+<!--
         <Button
             android:id="@+id/paper_wallet_export_txt"
             style="?android:attr/buttonBarButtonStyle"
@@ -250,4 +250,5 @@
             android:text="@string/paper_wallet_export_txt" />
 
     </LinearLayout>
+        -->
 </ScrollView>
