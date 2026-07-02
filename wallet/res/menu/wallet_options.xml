@@ -72,7 +72,7 @@
     <item
     android:id="@+id/wallet_options_create_paper_wallet"
     android:showAsAction="never"
-    android:title="Create paper wallet" />
+    android:title="@string/paper_wallet_activity_title" />
     <!-- end -->
     <item
         android:id="@+id/wallet_options_network_monitor"
