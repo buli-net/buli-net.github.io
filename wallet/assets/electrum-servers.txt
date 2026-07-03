@@ -1,2 +1,1 @@
-tls:electrum.blockstream.info:60002:236c9f3cd25dcd08c663fad8df5d80fe737985cf3dd75891770d6f4b8cc14d1f
-tls:blockstream.info:993:94a61fe41c15410c46037554784ec81df65b21d533cc9546bb850cf14f05da0e
+tls:testnet.qtornado.com:51002:688366b14f60fd4e460a10ebaebab7768c6a0433ef5b8d4f2d09ce853fec41bf
