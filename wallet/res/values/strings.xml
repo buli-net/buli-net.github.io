@@ -396,6 +396,18 @@
     <string name="paper_wallet_print">Print</string>
     <string name="paper_wallet_generated">New paper wallet generated</string>
 
+    <string name="paper_wallet_public_label">Public</string>
+<string name="paper_wallet_private_label">Private</string>
+<string name="paper_wallet_public_format_bech32">bech32</string>
+<string name="paper_wallet_public_format_legacy">P2PKH</string>
+<string name="paper_wallet_public_format_p2sh">P2SH</string>
+<string name="paper_wallet_public_format_hex">HEX</string>
+<string name="paper_wallet_private_format_wif">WIF</string>
+<string name="paper_wallet_private_format_hex">HEX</string>
+<string name="paper_wallet_show">SHOW</string>
+<string name="paper_wallet_hide">HIDE</string>
+<string name="paper_wallet_address_tap_hint">tap to switch</string>
+
     <string name="paper_wallet_encrypt_bip38">Encrypt with BIP38</string>
     <string name="paper_wallet_passphrase">Passphrase</string>
     <string name="paper_wallet_passphrase_confirm">Confirm passphrase</string>
