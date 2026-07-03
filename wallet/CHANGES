@@ -11,7 +11,7 @@ v11.04 mod by buli
 
 - Add code file wallet/res/xml/file_provider.xml [ add code line 9-->13 ]
 - Add code file wallet/AndroidManifest.xml [add code line 98-->105]
-- Add code file wallet/res/values/strings.xml [add code line 383 --> 404]
+- Add code file wallet/res/values/strings.xml [add code line 383 --> 446]
 - Add code file wallet/build.gradle [add code line 14]
 - Add code file wallet/src/wallet/ui/WalletActivity.java [ add code line 466--> 471]
 - Add code file wallet/res/menu/wallet_options.xml [add code line 71-->76]
