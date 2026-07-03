@@ -427,9 +427,6 @@ public class PaperWalletActivity extends AbstractWalletActivity {
 
         ((TextView) printView.findViewById(R.id.print_address)).setText(publicForPrint);
         ((TextView) printView.findViewById(R.id.print_privkey)).setText(privKeyForPrint);
-        ((TextView) printView.findViewById(R.id.print_address_type)).setText(
-            publicHexMode ? getString(R.string.paper_wallet_public_format_hex) : (addressType == ScriptType.P2PKH? getString(R.string.paper_wallet_public_format_legacy) : getString(R.string.paper_wallet_public_format_bech32))
-        );
 
         if (publicVisible && !publicForPrint.equals(getString(R.string.paper_wallet_hidden))) {
             ((ImageView) printView.findViewById(R.id.print_qr_address)).setImageBitmap(makeQr(publicForPrint));
