@@ -384,7 +384,7 @@
     
     <!-- Paper Wallet Activity -->
     <string name="paper_wallet_activity_title">Create paper wallet</string>
-    <string name="paper_wallet_print_title">-------- BITCOIN PAPER WALLET --------</string>
+    <string name="paper_wallet_print_title">Paper Wallet</string>
     
     <!-- Labels -->
     <string name="paper_wallet_warning">Anyone with the private key can spend. Store offline.</string>
@@ -404,7 +404,7 @@
     <string name="paper_wallet_export_txt">Export TXT</string>
 
     <!-- Public formats -->
-    <string name="paper_wallet_public_format_bech32">bech32</string>
+    <string name="paper_wallet_public_format_bech32">BECH32</string>
     <string name="paper_wallet_public_format_legacy">P2PKH</string>
     <string name="paper_wallet_public_format_p2sh">P2SH</string>
     <string name="paper_wallet_public_format_hex">HEX</string>
