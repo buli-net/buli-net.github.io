@@ -30,6 +30,7 @@ import org.bitcoinj.base.Network;
 import org.bitcoinj.base.ScriptType;
 import org.bitcoinj.base.BitcoinNetwork;
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.params.TestNet3Params;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -224,7 +225,7 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         NetworkParameters params = Constants.NETWORK_PARAMETERS;
         String id = params.getId().toLowerCase();
         if (id.contains("regtest")) return BitcoinNetwork.REGTEST;
-        if (id.contains("test")) return BitcoinNetwork.TESTNET;
+        if (id.contains("test") || id.contains("signet")) return BitcoinNetwork.TESTNET;
         return BitcoinNetwork.MAINNET;
     }
 
@@ -262,7 +263,11 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         // Derive address, public key, and private key in both WIF and HEX
         currentAddress = key.toAddress(addressType, network).toString();
         currentPubKeyHex = key.getPublicKeyAsHex();
-        currentPrivKeyWif = key.getPrivateKeyAsWiF(network);
+        NetworkParameters params = Constants.NETWORK_PARAMETERS;
+        String id = params.getId().toLowerCase();
+        boolean isTestOrSignet = id.contains("test") || id.contains("signet");
+        NetworkParameters wifParams = isTestOrSignet ? TestNet3Params.get() : params;
+        currentPrivKeyWif = key.getPrivateKeyEncoded(wifParams).toBase58();
         currentPrivKeyHex = key.getPrivateKeyAsHex();
         privKeyHexMode = false;
         publicHexMode = false;
