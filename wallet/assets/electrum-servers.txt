@@ -1,2 +1,1 @@
-tls:testnet.aranguren.org:51002:fe1f1a5caf4966036b7a8588385f58683f7a3f286dcfaa6855c691f2299634d8
 tls:electrum.blockstream.info:60002:236c9f3cd25dcd08c663fad8df5d80fe737985cf3dd75891770d6f4b8cc14d1f
