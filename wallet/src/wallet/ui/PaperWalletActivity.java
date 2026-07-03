@@ -110,6 +110,8 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         if (getActionBar()!= null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
 
+        setTitle(R.string.paper_wallet_activity_title);
+
         // Bind all views
         cardView = findViewById(R.id.paper_wallet_card);
         qrAddressView = findViewById(R.id.paper_wallet_qr_address);
@@ -132,11 +134,11 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         // Copy buttons
         findViewById(R.id.paper_wallet_copy_address).setOnClickListener(v -> {
             String key = publicHexMode ? currentPubKeyHex : currentAddress;
-            copyText("Public", key);
+            copyText(getString(R.string.paper_wallet_public_label), key);
         });
         findViewById(R.id.paper_wallet_copy_privkey).setOnClickListener(v -> {
             String key = bip38Mode? currentPrivKeyBip38 : (privKeyHexMode? currentPrivKeyHex : currentPrivKeyWif);
-            copyText("Private", key);
+            copyText(getString(R.string.paper_wallet_private_label), key);
         });
 
         // Tap public text to toggle ADDRESS/HEX format
@@ -245,11 +247,11 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         // Validate BIP38 passphrase before generating
         if (doBip38) {
             if (p1.isEmpty()) {
-                Toast.makeText(this, "Enter a BIP38 passphrase", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.paper_wallet_passphrase_empty, Toast.LENGTH_SHORT).show();
                 return;
             }
             if (!p1.equals(p2)) {
-                Toast.makeText(this, "Passphrases do not match", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.paper_wallet_passphrase_mismatch, Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -280,7 +282,7 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         // BIP38 encryption - run scrypt/AES off the UI thread
         final String passphrase = p1;
         final ECKey keyFinal = key;
-        Toast.makeText(this, "Encrypting BIP38...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.paper_wallet_encrypting_bip38, Toast.LENGTH_SHORT).show();
 
         executor.execute(() -> {
             try {
@@ -289,12 +291,12 @@ public class PaperWalletActivity extends AbstractWalletActivity {
                 runOnUiThread(() -> {
                     updatePrivKeyView();
                     generateBtn.setEnabled(true);
-                    Toast.makeText(this, "Paper wallet BIP38 ready", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.paper_wallet_bip38_ready, Toast.LENGTH_SHORT).show();
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> {
                     generateBtn.setEnabled(true);
-                    Toast.makeText(this, "BIP38 encryption failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.paper_wallet_bip38_failed, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
             }
         });
@@ -305,29 +307,29 @@ public class PaperWalletActivity extends AbstractWalletActivity {
      * Handles ADDRESS / HEX display modes and hide/show state.
      */
     private void updatePublicView() {
-        String base = "Public";
+        String base = getString(R.string.paper_wallet_public_label);
         String displayKey;
         String suffix;
         if (publicHexMode) {
             displayKey = currentPubKeyHex;
-            suffix = " (HEX)";
+            suffix = " (" + getString(R.string.paper_wallet_public_format_hex) + ")";
         } else {
             displayKey = currentAddress;
-            suffix = " (bech32)";
+            suffix = " (" + getString(R.string.paper_wallet_public_format_bech32) + ")";
         }
 
         if (publicVisible) {
             addressView.setText(displayKey);
-            toggleAddressBtn.setText("Hide");
+            toggleAddressBtn.setText(R.string.paper_wallet_hide);
             if (publicFormatBtn!= null) {
-                publicFormatBtn.setText(publicHexMode? "HEX" : "ADDRESS");
+                publicFormatBtn.setText(publicHexMode? R.string.paper_wallet_public_format_hex : R.string.paper_wallet_public_format_bech32);
             }
             if (publicLabelView!= null) publicLabelView.setText(base + suffix);
             if (qrAddressView!= null &&!displayKey.isEmpty()) qrAddressView.setImageBitmap(makeQr(displayKey));
             else if (qrAddressView!= null) qrAddressView.setImageBitmap(null);
         } else {
             addressView.setText("••••••••••••••••••••••••");
-            toggleAddressBtn.setText("Show");
+            toggleAddressBtn.setText(R.string.paper_wallet_show);
             if (publicLabelView!= null) publicLabelView.setText(base);
             if (qrAddressView!= null) qrAddressView.setImageBitmap(null);
         }
@@ -338,15 +340,15 @@ public class PaperWalletActivity extends AbstractWalletActivity {
      * Handles WIF / HEX / BIP38 display modes and hide/show state.
      */
     private void updatePrivKeyView() {
-        String base = "Private";
+        String base = getString(R.string.paper_wallet_private_label);
         String displayKey;
         String suffix;
         if (bip38Mode &&!currentPrivKeyBip38.isEmpty()) {
             displayKey = currentPrivKeyBip38;
-            suffix = " (BIP38)";
+            suffix = " (" + getString(R.string.paper_wallet_private_format_bip38) + ")";
         } else {
             displayKey = privKeyHexMode? currentPrivKeyHex : currentPrivKeyWif;
-            suffix = privKeyHexMode? " (HEX)" : " (WIF)";
+            suffix = privKeyHexMode? " (" + getString(R.string.paper_wallet_private_format_hex) + ")" : " (" + getString(R.string.paper_wallet_private_format_wif) + ")";
         }
 
         if (keyVisible) {
@@ -354,7 +356,7 @@ public class PaperWalletActivity extends AbstractWalletActivity {
             toggleKeyButton.setText(R.string.paper_wallet_hide_key);
             if (privKeyFormatBtn!= null) {
                 privKeyFormatBtn.setEnabled(!bip38Mode);
-                privKeyFormatBtn.setText(bip38Mode? "BIP38" : (privKeyHexMode? "HEX" : "WIF"));
+                privKeyFormatBtn.setText(bip38Mode? R.string.paper_wallet_private_format_bip38 : (privKeyHexMode? R.string.paper_wallet_private_format_hex : R.string.paper_wallet_private_format_wif));
                 privKeyFormatBtn.setAlpha(bip38Mode? 0.5f : 1.0f);
             }
             if (privKeyLabelView!= null) privKeyLabelView.setText(base + suffix);
@@ -379,7 +381,7 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         if (!publicVisible) return;
         publicHexMode =!publicHexMode;
         updatePublicView();
-        Toast.makeText(this, publicHexMode? "Public: HEX" : "Public: ADDRESS", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.paper_wallet_public_format_toast, publicHexMode? "HEX" : "ADDRESS"), Toast.LENGTH_SHORT).show();
     }
 
     /** Toggle private key visibility (show / hide with bullets). */
@@ -393,14 +395,14 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         if (!keyVisible || bip38Mode) return;
         privKeyHexMode =!privKeyHexMode;
         updatePrivKeyView();
-        Toast.makeText(this, privKeyHexMode? "Private: HEX" : "Private: WIF", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.paper_wallet_private_format_toast, privKeyHexMode? "HEX" : "WIF"), Toast.LENGTH_SHORT).show();
     }
 
     /** Copy text to clipboard with a Toast confirmation. */
     private void copyText(String label, String text) {
         ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         cm.setPrimaryClip(ClipData.newPlainText(label, text));
-        Toast.makeText(this, label + " copied", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.paper_wallet_copied, label), Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -415,31 +417,31 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         String privKeyForPrint = privKeyView.getText().toString();
 
         // Nếu đang ẩn thì không in ra key thật
-        if (!publicVisible) publicForPrint = "HIDDEN";
-        if (!keyVisible) privKeyForPrint = "HIDDEN";
+        if (!publicVisible) publicForPrint = getString(R.string.paper_wallet_hidden);
+        if (!keyVisible) privKeyForPrint = getString(R.string.paper_wallet_hidden);
 
         ((TextView) printView.findViewById(R.id.print_address)).setText(publicForPrint);
         ((TextView) printView.findViewById(R.id.print_privkey)).setText(privKeyForPrint);
         ((TextView) printView.findViewById(R.id.print_address_type)).setText(
-            publicHexMode ? "HEX" : (addressType == ScriptType.P2PKH? "Legacy P2PKH" : "SegWit bech32")
+            publicHexMode ? getString(R.string.paper_wallet_public_format_hex) : (addressType == ScriptType.P2PKH? getString(R.string.paper_wallet_public_format_legacy) : getString(R.string.paper_wallet_public_format_bech32))
         );
 
-        if (publicVisible && !publicForPrint.equals("HIDDEN")) {
+        if (publicVisible && !publicForPrint.equals(getString(R.string.paper_wallet_hidden))) {
             ((ImageView) printView.findViewById(R.id.print_qr_address)).setImageBitmap(makeQr(publicForPrint));
         }
-        if (keyVisible && !privKeyForPrint.equals("HIDDEN")) {
+        if (keyVisible && !privKeyForPrint.equals(getString(R.string.paper_wallet_hidden))) {
             ((ImageView) printView.findViewById(R.id.print_qr_key)).setImageBitmap(makeQr(privKeyForPrint));
         }
 
         TextView printPublicLabel = printView.findViewById(R.id.print_public_label);
         if (printPublicLabel!= null) {
-            String s = "Public" + (publicHexMode? " (HEX)" : " (bech32)");
+            String s = getString(R.string.paper_wallet_public_label) + (publicHexMode? " (" + getString(R.string.paper_wallet_public_format_hex) + ")" : " (" + getString(R.string.paper_wallet_public_format_bech32) + ")");
             printPublicLabel.setText(s);
         }
 
         TextView printPrivLabel = printView.findViewById(R.id.print_privkey_label);
         if (printPrivLabel!= null) {
-            String s = "Private" + (bip38Mode? " (BIP38)" : (privKeyHexMode? " (HEX)" : " (WIF)"));
+            String s = getString(R.string.paper_wallet_private_label) + (bip38Mode? " (" + getString(R.string.paper_wallet_private_format_bip38) + ")" : (privKeyHexMode? " (" + getString(R.string.paper_wallet_private_format_hex) + ")" : " (" + getString(R.string.paper_wallet_private_format_wif) + ")"));
             printPrivLabel.setText(s);
         }
 
@@ -481,23 +483,23 @@ public class PaperWalletActivity extends AbstractWalletActivity {
             try (OutputStream out = getContentResolver().openOutputStream(uri)) {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
             }
-            Toast.makeText(this, "Saved to Pictures/PaperWallet/" + filename, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.paper_wallet_saved, filename), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Toast.makeText(this, "Save failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.paper_wallet_save_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 
     /** Export wallet data as a plain text file to Documents/PaperWallet. Lấy đúng trạng thái hiển thị. */
     private void exportWalletTxt() {
         try {
-            String typeName = publicHexMode ? "HEX" : (addressType == ScriptType.P2PKH? "Legacy P2PKH" : "SegWit bech32");
+            String typeName = publicHexMode ? getString(R.string.paper_wallet_public_format_hex) : (addressType == ScriptType.P2PKH? getString(R.string.paper_wallet_public_format_legacy) : getString(R.string.paper_wallet_public_format_bech32));
             StringBuilder sb = new StringBuilder();
-            sb.append("Paper Wallet\n");
-            sb.append("Public type: ").append(typeName).append("\n");
-            sb.append("Public: ").append(publicVisible ? addressView.getText().toString() : "HIDDEN").append("\n");
-            sb.append("Private: ").append(keyVisible ? privKeyView.getText().toString() : "HIDDEN").append("\n");
+            sb.append(getString(R.string.paper_wallet_activity_title)).append("\n");
+            sb.append(getString(R.string.paper_wallet_public_type, typeName)).append("\n");
+            sb.append(getString(R.string.paper_wallet_public_label)).append(": ").append(publicVisible ? addressView.getText().toString() : getString(R.string.paper_wallet_hidden)).append("\n");
+            sb.append(getString(R.string.paper_wallet_private_label)).append(": ").append(keyVisible ? privKeyView.getText().toString() : getString(R.string.paper_wallet_hidden)).append("\n");
             if (bip38Mode &&!currentPrivKeyBip38.isEmpty()) {
-                sb.append("WARNING: BIP38 encrypted - passphrase required to spend\n");
+                sb.append(getString(R.string.paper_wallet_bip38_hint)).append("\n");
             }
 
             String filename = "paperwallet_" + System.currentTimeMillis() + ".txt";
@@ -510,9 +512,9 @@ public class PaperWalletActivity extends AbstractWalletActivity {
             try (OutputStream out = getContentResolver().openOutputStream(uri)) {
                 out.write(sb.toString().getBytes(StandardCharsets.UTF_8));
             }
-            Toast.makeText(this, "Exported to Documents/PaperWallet/" + filename, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.paper_wallet_exported, filename), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Toast.makeText(this, "Export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.paper_wallet_export_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -527,7 +529,7 @@ public class PaperWalletActivity extends AbstractWalletActivity {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(Intent.createChooser(intent, getString(R.string.paper_wallet_share)));
         } catch (Exception e) {
-            Toast.makeText(this, "Share failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.paper_wallet_share_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -536,9 +538,9 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         try {
             PrintHelper helper = new PrintHelper(this);
             helper.setScaleMode(PrintHelper.SCALE_MODE_FIT);
-            helper.printBitmap("Paper Wallet - " + currentAddress, buildPrintBitmap());
+            helper.printBitmap(getString(R.string.paper_wallet_activity_title) + " - " + currentAddress, buildPrintBitmap());
         } catch (Exception e) {
-            Toast.makeText(this, "Print failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.paper_wallet_print_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 
