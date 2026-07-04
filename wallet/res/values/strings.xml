@@ -484,6 +484,7 @@
 <string name="qr_confirmations">Confirmations</string>
 <string name="qr_time">Time</string>
 <string name="qr_age">Age</string>
+<string name="qr_ago">ago</string>
 <string name="qr_sent_details">Sent Details</string>
 <string name="qr_received_details">Received Details</string>
 <string name="qr_txid">Transaction ID</string>
