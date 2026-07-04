@@ -296,7 +296,7 @@ private TextView findTextViewWithText(ViewGroup g, String txt) {
 }); */
 
  //add sync bar 2/2
-
+        
  //add sync bar 2/2
 final View root = findViewById(android.R.id.content);
 final SharedPreferences prefs = getSharedPreferences("sync_prefs", MODE_PRIVATE);
@@ -327,17 +327,25 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
 
                 LinearLayout topRow = new LinearLayout(WalletActivity.this);
                 topRow.setOrientation(LinearLayout.HORIZONTAL);
+                topRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
 
                 TextView percent = new TextView(WalletActivity.this);
-                percent.setTextSize(11);
                 percent.setText("0.00%");
                 percent.setTextColor(tv.getCurrentTextColor());
+                // size bằng chữ sync
+                percent.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, tv.getTextSize());
+                // khoảng cách auto 8dp
+                int pad = (int)(8 * getResources().getDisplayMetrics().density);
+                percent.setPadding(pad, 0, 0, 0);
+                percent.setGravity(android.view.Gravity.CENTER_VERTICAL);
 
                 int idx = header.indexOfChild(tv);
                 header.removeView(tv);
 
                 topRow.addView(tv, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-                topRow.addView(percent, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                LinearLayout.LayoutParams lpPct = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                lpPct.gravity = android.view.Gravity.CENTER_VERTICAL;
+                topRow.addView(percent, lpPct);
 
                 ProgressBar bar = new ProgressBar(WalletActivity.this, null, android.R.attr.progressBarStyleHorizontal);
                 bar.setMax(10000);
@@ -379,6 +387,7 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
             lastProg[0] = prog;
             percentRef[0].setText(String.format(Locale.US, "%.2f%%", prog / 100f));
             percentRef[0].setTextColor(tv.getCurrentTextColor());
+            percentRef[0].setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, tv.getTextSize());
             barRef[0].setProgress(prog);
             barRef[0].setProgressTintList(android.content.res.ColorStateList.valueOf(tv.getCurrentTextColor()));
             barRef[0].setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(tv.getCurrentTextColor() & 0x33FFFFFF));
@@ -391,7 +400,8 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
             View v = g.getChildAt(i);
             if (v instanceof TextView) {
                 String t = ((TextView) v).getText().toString();
-                if (t.contains("Synchronizing") || t.contains("đồng bộ")) return (TextView) v;
+               // if (t.contains("Synchronizing") || t.contains("đồng bộ")) return (TextView) v;
+                if (t.contains(",") || t.contains(",")) return (TextView) v;
             }
             if (v instanceof ViewGroup) {
                 TextView t = findSync((ViewGroup) v);
