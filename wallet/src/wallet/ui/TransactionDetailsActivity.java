@@ -95,13 +95,37 @@ public class TransactionDetailsActivity extends Activity {
     // --- END QR DIALOG LIVE PATCH ---
 
     // Age ticker - updates the Age field every second
-    private final Handler ageHandler = new Handler(Looper.getMainLooper());
+  /*  private final Handler ageHandler = new Handler(Looper.getMainLooper());
     private final Runnable ageRunnable = new Runnable() {
         @Override
         public void run() {
             refreshLiveFields();
             ageHandler.postDelayed(this, 1000);
-        }
+        } */
+    private Handler ageHandler = new Handler(Looper.getMainLooper());
+    private Runnable ageUpdater = new Runnable() {
+    @Override
+    public void run() {
+        tvAge.setText(formatAge(txTime));
+        
+        // căn chỉnh về đúng đầu giây tiếp theo
+        long now = System.currentTimeMillis();
+        long delay = 1000 - (now % 1000);
+        ageHandler.postDelayed(this, delay);
+    }
+};
+
+@Override
+protected void onResume() {
+    super.onResume();
+    ageUpdater.run(); // chạy ngay
+}
+
+@Override
+protected void onPause() {
+    super.onPause();
+    ageHandler.removeCallbacks(ageUpdater);
+}
     };
 
     @Override
