@@ -297,7 +297,7 @@ private TextView findTextViewWithText(ViewGroup g, String txt) {
 
  //add sync bar 2/2
         
- //add sync bar 2/2
+  //add sync bar 2/2
 final View root = findViewById(android.R.id.content);
 final SharedPreferences prefs = getSharedPreferences("sync_prefs", MODE_PRIVATE);
 final int[] lastProg = { -1 };
@@ -308,7 +308,18 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
     @Override
     public void onGlobalLayout() {
         TextView tv = findSync((ViewGroup) root);
-        if (tv == null) return;
+
+        // === FIX CHỒNG CHỮ ===
+        boolean isSyncing = tv!= null && (
+            tv.getText().toString().contains("Synchronizing") ||
+            tv.getText().toString().contains("đồng bộ")
+        );
+        if (!isSyncing) {
+            if (barRef[0]!= null) barRef[0].setVisibility(View.GONE);
+            if (percentRef[0]!= null) percentRef[0].setVisibility(View.GONE);
+            return;
+        }
+        // === END FIX ===
 
         if ("wrapped".equals(tv.getTag())) {
             updateProgress(tv);
@@ -332,9 +343,7 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
                 TextView percent = new TextView(WalletActivity.this);
                 percent.setText("0.00%");
                 percent.setTextColor(tv.getCurrentTextColor());
-                // size bằng chữ sync
                 percent.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, tv.getTextSize());
-                // khoảng cách auto 8dp
                 int pad = (int)(8 * getResources().getDisplayMetrics().density);
                 percent.setPadding(pad, 0, 0, 0);
                 percent.setGravity(android.view.Gravity.CENTER_VERTICAL);
@@ -369,20 +378,39 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
 
     private void updateProgress(TextView tv) {
         if (barRef[0] == null || percentRef[0] == null) return;
-        String s = tv.getText().toString().toLowerCase();
+
+        // ẩn nếu không còn sync
+        String txt = tv.getText().toString().toLowerCase();
+        if (!txt.contains("synchronizing") &&!txt.contains("đồng bộ")) {
+            barRef[0].setVisibility(View.GONE);
+            percentRef[0].setVisibility(View.GONE);
+            return;
+        }
+
+        barRef[0].setVisibility(View.VISIBLE);
+        percentRef[0].setVisibility(View.VISIBLE);
+
         int h = 0;
         try {
-            int v = Integer.parseInt(s.replaceAll("[^0-9]", ""));
-            if (s.contains("hour") || s.contains("giờ")) h = v;
-            else if (s.contains("day") || s.contains("ngày")) h = v * 24;
-            else if (s.contains("week") || s.contains("tuần")) h = v * 7 * 24;
-            else if (s.contains("month") || s.contains("tháng")) h = v * 30 * 24;
-            else if (s.contains("year") || s.contains("năm")) h = v * 365 * 24;
+            int v = Integer.parseInt(txt.replaceAll("[^0-9]", ""));
+            if (txt.contains("hour") || txt.contains("giờ")) h = v;
+            else if (txt.contains("day") || txt.contains("ngày")) h = v * 24;
+            else if (txt.contains("week") || txt.contains("tuần")) h = v * 7 * 24;
+            else if (txt.contains("month") || txt.contains("tháng")) h = v * 30 * 24;
+            else if (txt.contains("year") || txt.contains("năm")) h = v * 365 * 24;
         } catch (Exception ignored) {}
         int max = prefs.getInt("max_hours", 0);
         if (h > max) { max = h; prefs.edit().putInt("max_hours", max).apply(); }
         if (h == 0 && max!= 0) { prefs.edit().remove("max_hours").apply(); max = 0; }
         int prog = max > 0? (int)((max - h) * 10000L / max) : 0;
+
+        // sync xong -> ẩn luôn
+        if (prog >= 10000 || h == 0) {
+            barRef[0].setVisibility(View.GONE);
+            percentRef[0].setVisibility(View.GONE);
+            return;
+        }
+
         if (prog!= lastProg[0]) {
             lastProg[0] = prog;
             percentRef[0].setText(String.format(Locale.US, "%.2f%%", prog / 100f));
@@ -400,8 +428,7 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
             View v = g.getChildAt(i);
             if (v instanceof TextView) {
                 String t = ((TextView) v).getText().toString();
-               // if (t.contains("Synchronizing") || t.contains("đồng bộ")) return (TextView) v;
-                if (t.contains(",") || t.contains(",")) return (TextView) v;
+                if (t.contains("Synchronizing") || t.contains("đồng bộ") || t.contains("BTC")) return (TextView) v;
             }
             if (v instanceof ViewGroup) {
                 TextView t = findSync((ViewGroup) v);
@@ -412,6 +439,7 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
     }
 });
 //end add sync bar
+ 
      //end add sync bar
         
         final View insetTopView = contentView.findViewWithTag("inset_top");
