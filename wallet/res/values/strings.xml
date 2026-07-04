@@ -444,7 +444,9 @@
     <string name="paper_wallet_public_type">Public type: %s</string>
 
  <!-- end add create paper wallet -->
-<!-- java -->
+    
+<!-- TransactionDetailsActivity -->
+     <!-- wallet/src/wallet/ui/TransactionDetailsActivity.java -->
 <string name="tx_details_title">Transaction Details</string>
 <string name="tx_details_missing_txid">Missing txid</string>
 <string name="tx_details_wallet_not_ready">Wallet not ready</string>
@@ -456,6 +458,8 @@
 <string name="tx_details_status_confirmed">Confirmed</string>
 <string name="tx_details_unconfirmed">Unconfirmed</string>
 <string name="tx_details_confirmations_value">%1$d confirmations · height %2$d</string>
+<string name="tx_details_total_from">Total: %1$s BTC from %2$d</string>
+<string name="tx_details_total_to">Total: %1$s BTC to %2$d</string>
 <string name="tx_details_copied">Copied</string>
 <string name="tx_details_save">Save</string>
 <string name="tx_details_share">Share</string>
@@ -466,7 +470,7 @@
 <string name="tx_details_share_tx">Share transaction</string>
 <string name="tx_details_no_browser">No browser found</string>
 
-<!-- xml -->
+      <!-- wallet/res/layout/activity_transaction_details.xml -->
 
 <string name="tx_details_qr_desc">Transaction QR</string>
 <string name="tx_details_sender_receiver">Sender / Receiver</string>
