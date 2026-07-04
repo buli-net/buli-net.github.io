@@ -291,11 +291,10 @@ public class PaperWalletActivity extends AbstractWalletActivity {
 
                 executor.execute(() -> {
     try {
-        // bitcoinj 0.17.1 fromPrivateKey
-        BIP38PrivateKey bip38 = BIP38PrivateKey.fromPrivateKey(
+        // Đúng API bitcoinj 0.17.1
+        BIP38PrivateKey bip38 = BIP38PrivateKey.encrypt(
             keyFinal.getPrivKeyBytes(), 
-            passphrase, 
-            network
+            passphrase
         );
         currentPrivKeyBip38 = bip38.toBase58();
         bip38Mode = true;
