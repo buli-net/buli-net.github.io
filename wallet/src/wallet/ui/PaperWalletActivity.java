@@ -42,7 +42,7 @@ import java.util.concurrent.Executors;
 import wallet.Constants;
 import wallet.R;
 import wallet.util.Qr;
-import wallet.util.Bip38Helper;
+import org.bitcoinj.crypto.BIP38PrivateKey;
 
 /**
  * Paper Wallet creation activity.
@@ -289,9 +289,10 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         final ECKey keyFinal = key;
         Toast.makeText(this, R.string.paper_wallet_encrypting_bip38, Toast.LENGTH_SHORT).show();
 
-        executor.execute(() -> {
+                executor.execute(() -> {
             try {
-                currentPrivKeyBip38 = Bip38Helper.encrypt(keyFinal, passphrase, network);
+                BIP38PrivateKey bip38 = BIP38PrivateKey.encrypt(keyFinal, passphrase);
+                currentPrivKeyBip38 = bip38.toBase58();
                 bip38Mode = true;
                 runOnUiThread(() -> {
                     updatePrivKeyView();
