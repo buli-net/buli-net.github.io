@@ -80,16 +80,13 @@ public class TransactionDetailsActivity extends Activity {
     private Dialog qrDialog;
     private ImageView qrDialogImageView;
 
-    // Age ticker - FIXED
+    // Age ticker - CHỈ SỬA 2 DÒNG NÀY
     private Handler ageHandler = new Handler(Looper.getMainLooper());
     private Runnable ageUpdater = new Runnable() {
         @Override
         public void run() {
-            if (tvAge != null && tx != null) {
-                Date txTime = null;
-                try { txTime = tx.getUpdateTime(); } catch (Exception ignored) {}
-                tvAge.setText(formatAge(txTime));
-            }
+            tvAge.setText(formatAge(tx != null ? tx.getUpdateTime() : null));
+            
             long now = System.currentTimeMillis();
             long delay = 1000 - (now % 1000);
             ageHandler.postDelayed(this, delay);
@@ -288,7 +285,7 @@ public class TransactionDetailsActivity extends Activity {
             tx.getConfidence().addEventListener(confidenceListener);
         }
         refreshLiveFields();
-        ageUpdater.run(); // FIXED: dùng ageUpdater, không phải ageRunnable
+        ageUpdater.run();
     }
 
     @Override
@@ -297,7 +294,7 @@ public class TransactionDetailsActivity extends Activity {
         if (tx != null && tx.getConfidence() != null) {
             tx.getConfidence().removeEventListener(confidenceListener);
         }
-        ageHandler.removeCallbacks(ageUpdater); // FIXED
+        ageHandler.removeCallbacks(ageUpdater);
     }
 
     @Override
@@ -313,6 +310,8 @@ public class TransactionDetailsActivity extends Activity {
         if (script == null) return null;
         try {
             return script.getToAddress(params).toString();
+        } catch (ScriptException e) {
+            return null;
         } catch (Exception e) {
             return null;
         }
@@ -401,24 +400,24 @@ public class TransactionDetailsActivity extends Activity {
         }
     }
 
-    private String buildLiveTxText() {
-        String ageStr = getTv(tvAge);
-        return getString(R.string.qr_direction) + ": " + getTv(tvDirection) + "\n"
-                + getString(R.string.qr_amount) + ": " + getTv(tvAmount) + "\n\n"
-                + getString(R.string.qr_sender_receiver) + "\n"
-                + getString(R.string.qr_from) + ": " + getTv(tvActualFrom) + "\n"
-                + getString(R.string.qr_to) + ": " + getTv(tvActualTo) + "\n\n"
-                + getString(R.string.qr_tx_details) + "\n"
-                + getString(R.string.qr_status) + ": " + getTv(tvStatus) + "\n"
-                + getString(R.string.qr_fee) + ": " + getTv(tvFee) + "\n"
-                + getString(R.string.qr_size_weight) + ": " + getTv(tvMeta) + "\n"
-                + getString(R.string.qr_confirmations) + ": " + getTv(tvHeight) + "\n"
-                + getString(R.string.qr_time) + ": " + getTv(tvTime) + "\n"
-                + getString(R.string.qr_age) + ": " + ageStr + "\n\n"
-                + getString(R.string.qr_sent_details) + "\n" + getTv(tvFrom) + "\n\n"
-                + getString(R.string.qr_received_details) + "\n" + getTv(tvTo) + "\n\n"
-                + getString(R.string.qr_txid) + "\n" + getTv(tvTxid);
-    }
+private String buildLiveTxText() {
+    String ageStr = getTv(tvAge);
+    return getString(R.string.qr_direction) + ": " + getTv(tvDirection) + "\n"
+            + getString(R.string.qr_amount) + ": " + getTv(tvAmount) + "\n\n"
+            + getString(R.string.qr_sender_receiver) + "\n"
+            + getString(R.string.qr_from) + ": " + getTv(tvActualFrom) + "\n"
+            + getString(R.string.qr_to) + ": " + getTv(tvActualTo) + "\n\n"
+            + getString(R.string.qr_tx_details) + "\n"
+            + getString(R.string.qr_status) + ": " + getTv(tvStatus) + "\n"
+            + getString(R.string.qr_fee) + ": " + getTv(tvFee) + "\n"
+            + getString(R.string.qr_size_weight) + ": " + getTv(tvMeta) + "\n"
+            + getString(R.string.qr_confirmations) + ": " + getTv(tvHeight) + "\n"
+            + getString(R.string.qr_time) + ": " + getTv(tvTime) + "\n"
+            + getString(R.string.qr_age) + ": " + ageStr + "\n\n"
+            + getString(R.string.qr_sent_details) + "\n" + getTv(tvFrom) + "\n\n"
+            + getString(R.string.qr_received_details) + "\n" + getTv(tvTo) + "\n\n"
+            + getString(R.string.qr_txid) + "\n" + getTv(tvTxid);
+}
     
     private String getTv(TextView tv) {
         return tv != null && tv.getText() != null ? tv.getText().toString() : "";
@@ -449,21 +448,22 @@ public class TransactionDetailsActivity extends Activity {
         boolean dark = isDark();
         int bgColor = dark ? Color.BLACK : Color.WHITE;
         
-        int dialogTheme = dark
-            ? android.R.style.Theme_Black_NoTitleBar_Fullscreen
-            : android.R.style.Theme_Light_NoTitleBar_Fullscreen;
+ int dialogTheme = dark
+    ? android.R.style.Theme_Black_NoTitleBar_Fullscreen
+    : android.R.style.Theme_Light_NoTitleBar_Fullscreen;
 
-        qrDialog = new Dialog(this, dialogTheme);
-        qrDialog.getWindow().setFlags(
-            android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
+qrDialog = new Dialog(this, dialogTheme);
 
-        if (android.os.Build.VERSION.SDK_INT >= 21) {
-            qrDialog.getWindow().setStatusBarColor(bgColor);
-        }
-        qrDialog.getWindow().getDecorView().setSystemUiVisibility(
-           android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-          | android.view.View.SYSTEM_UI_FLAG_FULLSCREEN);
+qrDialog.getWindow().setFlags(
+    android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN,
+    android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+if (android.os.Build.VERSION.SDK_INT >= 21) {
+    qrDialog.getWindow().setStatusBarColor(bgColor);
+}
+qrDialog.getWindow().getDecorView().setSystemUiVisibility(
+   android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+  | android.view.View.SYSTEM_UI_FLAG_FULLSCREEN);
         
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -474,7 +474,7 @@ public class TransactionDetailsActivity extends Activity {
 
         qrDialogImageView = new ImageView(this);
         qrDialogImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        qrDialogImageView.setPadding(48, 48, 48, 48);
+        qrDialogImageView.setPadding(48, 48, 48);
         LinearLayout.LayoutParams imgLp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
         qrDialogImageView.setLayoutParams(imgLp);
@@ -588,7 +588,7 @@ public class TransactionDetailsActivity extends Activity {
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.MARGIN, 1);
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-        BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, size, size, hints);
+        BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, size, hints);
         int w = bitMatrix.getWidth();
         int h = bitMatrix.getHeight();
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
@@ -600,47 +600,47 @@ public class TransactionDetailsActivity extends Activity {
         return bmp;
     }
 
-    private String formatAge(Date txTime) {
-        if (txTime == null) return "—";
+private String formatAge(Date txTime) {
+    if (txTime == null) return "—";
+    
+    try {
+        java.time.ZonedDateTime then = txTime.toInstant().atZone(java.time.ZoneId.systemDefault());
+        java.time.ZonedDateTime now = java.time.ZonedDateTime.now();
         
-        try {
-            java.time.ZonedDateTime then = txTime.toInstant().atZone(java.time.ZoneId.systemDefault());
-            java.time.ZonedDateTime now = java.time.ZonedDateTime.now();
-            
-            if (then.isAfter(now)) then = now;
-            
-            java.time.Period period = java.time.Period.between(then.toLocalDate(), now.toLocalDate());
-            java.time.Duration timePart = java.time.Duration.between(then.toLocalTime(), now.toLocalTime());
-            
-            if (timePart.isNegative()) {
-                period = period.minusDays(1);
-                timePart = timePart.plusDays(1);
-            }
-            
-            long years = period.getYears();
-            long months = period.getMonths();
-            long days = period.getDays();
-            long hours = timePart.toHours();
-            long minutes = timePart.toMinutes() % 60;
-            long seconds = timePart.getSeconds() % 60;
-            
-            StringBuilder sb = new StringBuilder();
-            
-            if (years > 0) sb.append(years).append(" ").append(getString(years == 1 ? R.string.qr_year : R.string.qr_years)).append(" ");
-            if (months > 0) sb.append(months).append(" ").append(getString(months == 1 ? R.string.qr_month : R.string.qr_months)).append(" ");
-            if (days > 0) sb.append(days).append(" ").append(getString(days == 1 ? R.string.qr_day : R.string.qr_days)).append(" ");
-            if (hours > 0 || sb.length() > 0) sb.append(hours).append(" ").append(getString(hours == 1 ? R.string.qr_hour : R.string.qr_hours)).append(" ");
-            if (minutes > 0 || sb.length() > 0) sb.append(minutes).append(" ").append(getString(minutes == 1 ? R.string.qr_minute : R.string.qr_minutes)).append(" ");
-            sb.append(seconds).append(" ").append(getString(seconds == 1 ? R.string.qr_second : R.string.qr_seconds)).append(" ");
-            sb.append(getString(R.string.qr_ago));
-            
-            return sb.toString().trim().replaceAll(" +", " ");
-            
-        } catch (Exception e) {
-            long diffSec = (System.currentTimeMillis() - txTime.getTime()) / 1000;
-            return diffSec + " " + getString(R.string.qr_seconds) + " " + getString(R.string.qr_ago);
+        if (then.isAfter(now)) then = now;
+        
+        java.time.Period period = java.time.Period.between(then.toLocalDate(), now.toLocalDate());
+        java.time.Duration timePart = java.time.Duration.between(then.toLocalTime(), now.toLocalTime());
+        
+        if (timePart.isNegative()) {
+            period = period.minusDays(1);
+            timePart = timePart.plusDays(1);
         }
+        
+        long years = period.getYears();
+        long months = period.getMonths();
+        long days = period.getDays();
+        long hours = timePart.toHours();
+        long minutes = timePart.toMinutes() % 60;
+        long seconds = timePart.getSeconds() % 60;
+        
+        StringBuilder sb = new StringBuilder();
+        
+        if (years > 0) sb.append(years).append(" ").append(getString(years == 1 ? R.string.qr_year : R.string.qr_years)).append(" ");
+        if (months > 0) sb.append(months).append(" ").append(getString(months == 1 ? R.string.qr_month : R.string.qr_months)).append(" ");
+        if (days > 0) sb.append(days).append(" ").append(getString(days == 1 ? R.string.qr_day : R.string.qr_days)).append(" ");
+        if (hours > 0 || sb.length() > 0) sb.append(hours).append(" ").append(getString(hours == 1 ? R.string.qr_hour : R.string.qr_hours)).append(" ");
+        if (minutes > 0 || sb.length() > 0) sb.append(minutes).append(" ").append(getString(minutes == 1 ? R.string.qr_minute : R.string.qr_minutes)).append(" ");
+        sb.append(seconds).append(" ").append(getString(seconds == 1 ? R.string.qr_second : R.string.qr_seconds)).append(" ");
+        sb.append(getString(R.string.qr_ago));
+        
+        return sb.toString().trim().replaceAll(" +", " ");
+        
+    } catch (Exception e) {
+        long diffSec = (System.currentTimeMillis() - txTime.getTime()) / 1000;
+        return diffSec + " " + getString(R.string.qr_seconds) + " " + getString(R.string.qr_ago);
     }
+}
     
     private void refreshLiveFields() {
         if (tx == null || tvStatus == null || tvHeight == null) return;
