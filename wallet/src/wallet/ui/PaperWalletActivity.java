@@ -42,7 +42,7 @@ import java.util.concurrent.Executors;
 import wallet.Constants;
 import wallet.R;
 import wallet.util.Qr;
-import org.bitcoinj.crypto.BIP38PrivateKey;
+import wallet.util.Bip38Helper;
 
 /**
  * Paper Wallet creation activity.
@@ -289,27 +289,22 @@ public class PaperWalletActivity extends AbstractWalletActivity {
         final ECKey keyFinal = key;
         Toast.makeText(this, R.string.paper_wallet_encrypting_bip38, Toast.LENGTH_SHORT).show();
 
-                executor.execute(() -> {
-    try {
-        // Đúng API bitcoinj 0.17.1
-        BIP38PrivateKey bip38 = BIP38PrivateKey.encrypt(
-            keyFinal.getPrivKeyBytes(), 
-            passphrase
-        );
-        currentPrivKeyBip38 = bip38.toBase58();
-        bip38Mode = true;
-        runOnUiThread(() -> {
-            updatePrivKeyView();
-            generateBtn.setEnabled(true);
-            Toast.makeText(this, R.string.paper_wallet_bip38_ready, Toast.LENGTH_SHORT).show();
+        executor.execute(() -> {
+            try {
+                currentPrivKeyBip38 = Bip38Helper.encrypt(keyFinal, passphrase, network);
+                bip38Mode = true;
+                runOnUiThread(() -> {
+                    updatePrivKeyView();
+                    generateBtn.setEnabled(true);
+                    Toast.makeText(this, R.string.paper_wallet_bip38_ready, Toast.LENGTH_SHORT).show();
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    generateBtn.setEnabled(true);
+                    Toast.makeText(this, getString(R.string.paper_wallet_bip38_failed, e.getMessage()), Toast.LENGTH_LONG).show();
+                });
+            }
         });
-    } catch (Exception e) {
-        runOnUiThread(() -> {
-            generateBtn.setEnabled(true);
-            Toast.makeText(this, getString(R.string.paper_wallet_bip38_failed, e.getMessage()), Toast.LENGTH_LONG).show();
-        });
-    }
-});
     }
 
     /**
