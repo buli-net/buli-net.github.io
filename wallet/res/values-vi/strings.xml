@@ -469,7 +469,25 @@
 <string name="tx_details_save_failed_msg">Lưu thất bại: %s</string>
 <string name="tx_details_share_tx">Chia sẻ giao dịch</string>
 <string name="tx_details_no_browser">Không tìm thấy trình duyệt</string>
-
+	
+	 <!-- qr copy txt -->
+	
+<string name="qr_direction">Hướng</string>
+<string name="qr_amount">Số tiền</string>
+<string name="qr_sender_receiver">Người gửi / Người nhận</string>
+<string name="qr_from">Từ</string>
+<string name="qr_to">Đến</string>
+<string name="qr_tx_details">Chi tiết giao dịch</string>
+<string name="qr_status">Trạng thái</string>
+<string name="qr_fee">Phí</string>
+<string name="qr_size_weight">Kích thước / Trọng số</string>
+<string name="qr_confirmations">Xác nhận</string>
+<string name="qr_time">Thời gian</string>
+<string name="qr_age">Tuổi</string>
+<string name="qr_sent_details">Chi tiết đã gửi</string>
+<string name="qr_received_details">Chi tiết đã nhận</string>
+<string name="qr_txid">Mã giao dịch</string>
+	
      <!-- wallet/res/layout/activity_transaction_details.xml -->
 
 <string name="tx_details_qr_desc">Mã QR giao dịch</string>
