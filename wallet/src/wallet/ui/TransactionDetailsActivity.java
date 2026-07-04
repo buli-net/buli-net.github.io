@@ -499,7 +499,7 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
 
         qrDialogImageView = new ImageView(this);
         qrDialogImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        qrDialogImageView.setPadding(48, 48, 48);
+        qrDialogImageView.setPadding(48, 48);
         LinearLayout.LayoutParams imgLp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
         qrDialogImageView.setLayoutParams(imgLp);
@@ -538,7 +538,7 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
         col.setLayoutParams(lp);
         col.setClickable(true);
         col.setOnClickListener(onClick);
-        col.setPadding(8, 8, 8);
+        col.setPadding(8, 8);
 
         ImageView iv = new ImageView(this);
         iv.setImageResource(iconRes);
@@ -550,7 +550,7 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
 
         TextView tv = new TextView(this);
         tv.setText(label);
-        tv.setTextColor(dark ? 0xFFBBBBBB : 0xFF666);
+        tv.setTextColor(dark ? 0xFFBBBBBB : 0xFF666666);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         tv.setGravity(Gravity.CENTER);
         tv.setPadding(0, 8, 0, 0);
@@ -580,7 +580,7 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 values.clear();
                 values.put(MediaStore.Images.Media.IS_PENDING, 0);
-                getContentResolver().update(uri, values, null);
+                getContentResolver().update(uri, values, null, null);
             }
             Toast.makeText(this, getString(R.string.tx_details_saved_to_pictures), Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
@@ -611,7 +611,7 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
 
     public static Bitmap encodeQr(String text, int size) throws WriterException {
         QRCodeWriter writer = new QRCodeWriter();
-        BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, size);
+        BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, size, size);
         int w = bitMatrix.getWidth();
         int h = bitMatrix.getHeight();
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
