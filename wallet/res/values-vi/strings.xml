@@ -444,6 +444,29 @@
     <string name="paper_wallet_public_type">Loại công khai: %s</string>
 
 <!-- end add create paper wallet -->
+
+<!-- TransactionDetailsActivity -->
+	
+<string name="tx_details_title">Chi tiết giao dịch</string>
+<string name="tx_details_missing_txid">Thiếu txid</string>
+<string name="tx_details_wallet_not_ready">Ví chưa sẵn sàng</string>
+<string name="tx_details_transaction_not_found">Không tìm thấy giao dịch</string>
+<string name="tx_details_sent">Đã gửi</string>
+<string name="tx_details_received">Đã nhận</string>
+<string name="tx_details_status_pending">Đang chờ</string>
+<string name="tx_details_status_building">Đang xây dựng</string>
+<string name="tx_details_status_confirmed">Đã xác nhận</string>
+<string name="tx_details_unconfirmed">Chưa xác nhận</string>
+<string name="tx_details_confirmations_value">%1$d xác nhận · khối %2$d</string>
+<string name="tx_details_copied">Đã sao chép</string>
+<string name="tx_details_save">Lưu</string>
+<string name="tx_details_share">Chia sẻ</string>
+<string name="tx_details_explore">Khám phá</string>
+<string name="tx_details_save_failed">Lưu thất bại</string>
+<string name="tx_details_saved_to_pictures">Đã lưu vào Pictures/WalletQR</string>
+<string name="tx_details_save_failed_msg">Lưu thất bại: %s</string>
+<string name="tx_details_share_tx">Chia sẻ giao dịch</string>
+<string name="tx_details_no_browser">Không tìm thấy trình duyệt</string>
 	
 </resources>
 
