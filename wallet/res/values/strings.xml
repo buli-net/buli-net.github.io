@@ -444,7 +444,7 @@
     <string name="paper_wallet_public_type">Public type: %s</string>
 
  <!-- end add create paper wallet -->
-
+<!-- java -->
 <string name="tx_details_title">Transaction Details</string>
 <string name="tx_details_missing_txid">Missing txid</string>
 <string name="tx_details_wallet_not_ready">Wallet not ready</string>
@@ -465,6 +465,24 @@
 <string name="tx_details_save_failed_msg">Save failed: %s</string>
 <string name="tx_details_share_tx">Share transaction</string>
 <string name="tx_details_no_browser">No browser found</string>
+
+<!-- xml -->
+
+<string name="tx_details_qr_desc">Transaction QR</string>
+<string name="tx_details_sender_receiver">Sender / Receiver</string>
+<string name="tx_details_from">From</string>
+<string name="tx_details_to">To</string>
+<string name="tx_details_transaction_details">Transaction details</string>
+<string name="tx_details_status">Status</string>
+<string name="tx_details_fee">Fee</string>
+<string name="tx_details_size_weight">Size / Weight</string>
+<string name="tx_details_confirmations">Confirmations</string>
+<string name="tx_details_time">Time</string>
+<string name="tx_details_age">Age</string>
+<string name="tx_details_sent_details">Sent Details</string>
+<string name="tx_details_received_details">Received Details</string>
+<string name="tx_details_transaction_id">Transaction ID</string>
+<string name="tx_details_tap_to_copy">Tap to copy</string>
     
 <!-- end TransactionDetailsActivity -->
     
