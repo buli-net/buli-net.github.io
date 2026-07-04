@@ -443,5 +443,31 @@
     <string name="paper_wallet_hidden">HIDDEN</string>
     <string name="paper_wallet_public_type">Public type: %s</string>
 
-<!-- end add create paper wallet -->
+ <!-- end add create paper wallet -->
+    
+<!-- TransactionDetailsActivity -->
+    
+<string name="tx_details_title">Transaction Details</string>
+<string name="tx_details_missing_txid">Missing txid</string>
+<string name="tx_details_wallet_not_ready">Wallet not ready</string>
+<string name="tx_details_transaction_not_found">Transaction not found</string>
+<string name="tx_details_sent">Sent</string>
+<string name="tx_details_received">Received</string>
+<string name="tx_details_status_pending">Pending</string>
+<string name="tx_details_status_building">Building</string>
+<string name="tx_details_status_confirmed">Confirmed</string>
+<string name="tx_details_unconfirmed">unconfirmed</string>
+<string name="tx_details_confirmations_value">%1$d confirmations · height %2$d</string>
+<string name="tx_details_copied">Copied</string>
+<string name="tx_details_save">Save</string>
+<string name="tx_details_share">Share</string>
+<string name="tx_details_explore">Explore</string>
+<string name="tx_details_save_failed">Save failed</string>
+<string name="tx_details_saved_to_pictures">Saved to Pictures/WalletQR</string>
+<string name="tx_details_save_failed_msg">Save failed: %s</string>
+<string name="tx_details_share_tx">Share transaction</string>
+<string name="tx_details_no_browser">No browser found</string>
+    
+<!-- end TransactionDetailsActivity -->
+    
 </resources>
