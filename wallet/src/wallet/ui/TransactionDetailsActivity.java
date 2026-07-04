@@ -430,25 +430,25 @@ public class TransactionDetailsActivity extends Activity {
         }
     }
 
-    private String buildLiveTxText() {
-        String ageStr = tvAge != null && tvAge.getText() != null ? tvAge.getText().toString() : "";
-        return "Direction: " + getTv(tvDirection) + "\n"
-                + "Amount: " + getTv(tvAmount) + "\n\n"
-                + "Sender / Receiver\n"
-                + "From: " + getTv(tvActualFrom) + "\n"
-                + "To: " + getTv(tvActualTo) + "\n\n"
-                + "Transaction details\n"
-                + "Status: " + getTv(tvStatus) + "\n"
-                + "Fee: " + getTv(tvFee) + "\n"
-                + "Size / Weight: " + getTv(tvMeta) + "\n"
-                + "Confirmations: " + getTv(tvHeight) + "\n"
-                + "Time: " + getTv(tvTime) + "\n"
-                + "Age: " + ageStr + "\n\n"
-                + "Sent Details\n" + getTv(tvFrom) + "\n\n"
-                + "Received Details\n" + getTv(tvTo) + "\n\n"
-                + "Transaction ID\n" + getTv(tvTxid);
-    }
-
+private String buildLiveTxText() {
+    String ageStr = getTv(tvAge);
+    return getString(R.string.qr_direction) + ": " + getTv(tvDirection) + "\n"
+            + getString(R.string.qr_amount) + ": " + getTv(tvAmount) + "\n\n"
+            + getString(R.string.qr_sender_receiver) + "\n"
+            + getString(R.string.qr_from) + ": " + getTv(tvActualFrom) + "\n"
+            + getString(R.string.qr_to) + ": " + getTv(tvActualTo) + "\n\n"
+            + getString(R.string.qr_tx_details) + "\n"
+            + getString(R.string.qr_status) + ": " + getTv(tvStatus) + "\n"
+            + getString(R.string.qr_fee) + ": " + getTv(tvFee) + "\n"
+            + getString(R.string.qr_size_weight) + ": " + getTv(tvMeta) + "\n"
+            + getString(R.string.qr_confirmations) + ": " + getTv(tvHeight) + "\n"
+            + getString(R.string.qr_time) + ": " + getTv(tvTime) + "\n"
+            + getString(R.string.qr_age) + ": " + ageStr + "\n\n"
+            + getString(R.string.qr_sent_details) + "\n" + getTv(tvFrom) + "\n\n"
+            + getString(R.string.qr_received_details) + "\n" + getTv(tvTo) + "\n\n"
+            + getString(R.string.qr_txid) + "\n" + getTv(tvTxid);
+}
+    
     private String getTv(TextView tv) {
         return tv != null && tv.getText() != null ? tv.getText().toString() : "";
     }
