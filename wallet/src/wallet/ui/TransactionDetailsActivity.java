@@ -263,7 +263,8 @@ public class TransactionDetailsActivity extends Activity {
                       .append(v != null ? v.toPlainString() + " BTC" : "? BTC").append("\n");
             }
         }
-        String fromText = "Total: " + totalFrom.toPlainString() + " BTC from " + inCount + "\n" + fromSb.toString().trim();
+
+        String fromText = getString(R.string.tx_details_total_from, totalFrom.toPlainString(), inCount) + "\n" + fromSb.toString().trim();
         
         StringBuilder toSb = new StringBuilder();
         Coin totalTo = Coin.ZERO;
@@ -279,8 +280,9 @@ public class TransactionDetailsActivity extends Activity {
                     .append(v != null ? v.toPlainString() + " BTC" : "? BTC").append("\n");
             }
         }
-        String toText = "Total: " + totalTo.toPlainString() + " BTC to " + outCount + "\n" + toSb.toString().trim();
 
+        String toText = getString(R.string.tx_details_total_to, totalTo.toPlainString(), outCount) + "\n" + toSb.toString().trim();
+        
         tvFrom.setSingleLine(false);
         tvTo.setSingleLine(false);
         tvFrom.setText(fromText);
