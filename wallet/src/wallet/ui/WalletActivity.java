@@ -295,91 +295,77 @@ private TextView findTextViewWithText(ViewGroup g, String txt) {
     }
 }); */
 
-
  //add sync bar 2/2
 final View root = findViewById(android.R.id.content);
 final SharedPreferences prefs = getSharedPreferences("sync_prefs", MODE_PRIVATE);
 final int[] lastProg = { -1 };
-final ProgressBar bar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-bar.setMax(10000);
-bar.setVisibility(View.GONE);
-((ViewGroup) getWindow().getDecorView()).addView(bar,
-        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                (int) (3 * getResources().getDisplayMetrics().density)));
-final TextView percent = new TextView(this);
-percent.setTextSize(12);
-percent.setVisibility(View.GONE);
-((ViewGroup) getWindow().getDecorView()).addView(percent);
+final ProgressBar[] barRef = new ProgressBar[1];
+final TextView[] percentRef = new TextView[1];
 
 root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
     @Override
     public void onGlobalLayout() {
         TextView tv = findSync((ViewGroup) root);
-        if (tv == null || tv.getVisibility()!= View.VISIBLE) {
-            bar.setVisibility(View.GONE);
-            percent.setVisibility(View.GONE);
+        if (tv == null) return;
+
+        // chỉ làm 1 lần
+        if (barRef[0]!= null) {
+            updateProgress(tv);
             return;
         }
 
-        int syncTextColor = tv.getCurrentTextColor();
-        percent.setTextColor(syncTextColor);
-        bar.setProgressTintList(android.content.res.ColorStateList.valueOf(syncTextColor));
-        bar.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(syncTextColor & 0x33FFFFFF));
+        ViewGroup header = (ViewGroup) tv.getParent(); // chỗ chứa chữ + QR
+        // tạo container dọc
+        LinearLayout container = new LinearLayout(WalletActivity.this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setLayoutParams(tv.getLayoutParams());
 
-        int[] loc = new int[2];
-        tv.getLocationOnScreen(loc);
-        int left = loc[0];
-        int top = loc[1];
-        float d = getResources().getDisplayMetrics().density;
+        // dòng trên: chữ sync + %
+        LinearLayout topRow = new LinearLayout(WalletActivity.this);
+        topRow.setOrientation(LinearLayout.HORIZONTAL);
+        TextView percent = new TextView(WalletActivity.this);
+        percent.setTextSize(11);
+        percent.setText("0.00%");
+        percent.setTextColor(tv.getCurrentTextColor());
+        LinearLayout.LayoutParams lpTv = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+        LinearLayout.LayoutParams lpPct = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        topRow.addView(tv, lpTv);
+        topRow.addView(percent, lpPct);
 
-        percent.setText(String.format(Locale.US, "%.2f%%", lastProg[0] / 100f));
-        percent.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        int percentW = percent.getMeasuredWidth();
-        int gap = (int)(8 * d);
-        int padEnd = (int)(8 * d);
-        int textW = (int) tv.getPaint().measureText(tv.getText().toString());
-        int wantedWidth = textW + gap + percentW + padEnd;
+        // bar
+        ProgressBar bar = new ProgressBar(WalletActivity.this, null, android.R.attr.progressBarStyleHorizontal);
+        bar.setMax(10000);
+        bar.setProgress(0);
+        int h = (int)(2.5f * getResources().getDisplayMetrics().density);
+        LinearLayout.LayoutParams lpBar = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h);
+        lpBar.topMargin = (int)(2 * getResources().getDisplayMetrics().density);
+        bar.setLayoutParams(lpBar);
+        bar.setProgressTintList(android.content.res.ColorStateList.valueOf(tv.getCurrentTextColor()));
 
-        View qr = findQr((ViewGroup) root);
-        int qrLeft = qr!= null? getLeftOnScreen(qr) : root.getWidth();
-        int maxAllowed = Math.max(0, qrLeft - left - (int)(8 * d));
-        int barWidth = Math.min(wantedWidth, maxAllowed);
+        container.addView(topRow);
+        container.addView(bar);
 
-        int percentX = left + textW + gap;
-        if (percentX + percentW > left + barWidth - padEnd) {
-            percentX = left + barWidth - padEnd - percentW;
-        }
-        percentX = Math.max(percentX, left + (int)(4 * d));
-        percent.setX(percentX);
+        // thay thế tv cũ bằng container
+        int idx = header.indexOfChild(tv);
+        header.removeView(tv);
+        header.addView(container, idx);
 
-        int tvBaseline = tv.getBaseline();
-        int pBaseline = percent.getBaseline();
-        if (tvBaseline > 0 && pBaseline > 0) {
-            percent.setY(top + tvBaseline - pBaseline);
-        } else {
-            percent.setY(top + tv.getHeight() - percent.getMeasuredHeight());
-        }
+        barRef[0] = bar;
+        percentRef[0] = percent;
 
-        percent.setVisibility(View.VISIBLE);
-        bar.setX(left);
-        bar.setY(top + tv.getHeight() + (int)(4 * d));
-        bar.getLayoutParams().width = barWidth;
-        bar.setVisibility(View.VISIBLE);
+        updateProgress(tv);
+    }
 
-        // FIX 1 – bám theo khi cuộn
-        tv.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> root.requestLayout());
-        // FIX 2 – cập nhật liên tục
-        percent.postDelayed(() -> root.requestLayout(), 100);
-
+    private void updateProgress(TextView tv) {
         String s = tv.getText().toString().toLowerCase();
         int h = 0;
         try {
             int v = Integer.parseInt(s.replaceAll("[^0-9]", ""));
-            if (s.contains("hour")) h = v;
-            else if (s.contains("day")) h = v * 24;
-            else if (s.contains("week")) h = v * 7 * 24;
-            else if (s.contains("month")) h = v * 30 * 24;
-            else if (s.contains("year")) h = v * 365 * 24;
+            if (s.contains("hour") || s.contains("giờ")) h = v;
+            else if (s.contains("day") || s.contains("ngày")) h = v * 24;
+            else if (s.contains("week") || s.contains("tuần")) h = v * 7 * 24;
+            else if (s.contains("month") || s.contains("tháng")) h = v * 30 * 24;
+            else if (s.contains("year") || s.contains("năm")) h = v * 365 * 24;
         } catch (Exception ignored) {}
         int max = prefs.getInt("max_hours", 0);
         if (h > max) { max = h; prefs.edit().putInt("max_hours", max).apply(); }
@@ -387,9 +373,10 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
         int prog = max > 0? (int)((max - h) * 10000L / max) : 0;
         if (prog!= lastProg[0]) {
             lastProg[0] = prog;
-            percent.setText(String.format(Locale.US, "%.2f%%", prog / 100f));
-            bar.setProgress(prog);
+            if (percentRef[0]!= null) percentRef[0].setText(String.format(Locale.US, "%.2f%%", prog / 100f));
+            if (barRef[0]!= null) barRef[0].setProgress(prog);
         }
+        tv.postDelayed(() -> updateProgress(tv), 500);
     }
 
     private TextView findSync(ViewGroup g) {
@@ -404,26 +391,9 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
         }
         return null;
     }
-
-    private View findQr(ViewGroup g) {
-        for (int i = 0; i < g.getChildCount(); i++) {
-            View v = g.getChildAt(i);
-            if (v instanceof ImageView && v.getWidth() > 50 && v.getX() > g.getWidth() * 0.6)
-                return v;
-            if (v instanceof ViewGroup) {
-                View t = findQr((ViewGroup) v);
-                if (t!= null) return t;
-            }
-        }
-        return null;
-    }
-
-    private int getLeftOnScreen(View v) {
-        int[] l = new int[2];
-        v.getLocationOnScreen(l);
-        return l[0];
-    }
 });
+//end add sync bar
+
         
      //end add sync bar
         
