@@ -49,6 +49,8 @@ v11.04 mod by buli
 - Add code file wallet/res/menu/wallet_transactions_context.xml [ add code line 11->18 ]
 - Add code file wallet/AndroidManifest.xml [ add code line 91-->98 ]
 - Add code file wallet/src/wallet/ui/WalletTransactionsFragment.java [ add code line 63-->65, 313-->319 ]
+- Add code file wallet/res/values/colors.xml [ add code line 53 ]
+- Add code file wallet/res/values-night/colors.xml [ add code line 30 ]
 
 =====================================================================
 
