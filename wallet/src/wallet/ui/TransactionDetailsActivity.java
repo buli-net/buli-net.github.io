@@ -261,6 +261,10 @@ public class TransactionDetailsActivity extends Activity {
                         addr = getAddressFromScript(connected.getScriptPubKey(), params);
                         if (addr == null) addr = "unknown";
                         type = getAddressType(addr, connected.getScriptPubKey());
+                    } else {
+                        // FIX: lấy địa chỉ từ witness nếu không có parent
+                        String witAddr = getInputAddress(tx, params, wallet, null);
+                        if (witAddr != null) addr = witAddr;
                     }
                 } catch (Exception ignored) {}
                 if (v != null) totalFrom = totalFrom.add(v);
@@ -374,6 +378,14 @@ public class TransactionDetailsActivity extends Activity {
                     String a = getAddressFromScript(connected.getScriptPubKey(), params);
                     if (a != null) return a;
                 }
+                // FIX SIGNET: đọc từ witness
+                if (in.getWitness() != null && in.getWitness().getPushCount() >= 2) {
+                    try {
+                        byte[] pubkey = in.getWitness().getPush(1);
+                        org.bitcoinj.core.ECKey key = org.bitcoinj.core.ECKey.fromPublicOnly(pubkey);
+                        return key.toAddress(params).toString();
+                    } catch (Exception ignored) {}
+                }
                 if (mineOnly == null) {
                     try {
                         String a = getAddressFromScript(in.getScriptSig(), params);
@@ -456,13 +468,14 @@ private String buildLiveTxText() {
 
     private void updateLiveQr() {
         try {
-            String text = buildLiveTxText();
+            // FIX: QR chỉ chứa TXID để tránh "Data too big" trên tx lớn
+            String qrText = tx != null ? tx.getTxId().toString() : getTv(tvTxid);
             if (ivQr != null) {
-                currentQrBitmap = encodeQr(text, 768);
+                currentQrBitmap = encodeQr(qrText, 512);
                 ivQr.setImageBitmap(currentQrBitmap);
             }
             if (qrDialog != null && qrDialog.isShowing() && qrDialogImageView != null) {
-                Bitmap big = encodeQr(text, 1024);
+                Bitmap big = encodeQr(qrText, 900);
                 qrDialogImageView.setImageBitmap(big);
                 currentQrBitmap = big;
             }
@@ -569,7 +582,7 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
         try {
             Bitmap bmp = currentQrBitmap;
             if (bmp == null) {
-                bmp = encodeQr(buildLiveTxText(), 1024);
+                bmp = encodeQr(tx != null ? tx.getTxId().toString() : "", 1024);
             }
             String filename = "tx_" + (tx != null ? tx.getTxId().toString().substring(0, 8) : "qr") + "_" + System.currentTimeMillis() + ".png";
             ContentValues values = new ContentValues();
