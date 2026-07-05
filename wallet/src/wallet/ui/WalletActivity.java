@@ -146,180 +146,34 @@ public final class WalletActivity extends AbstractWalletActivity {
         contentView = findViewById(android.R.id.content);
 
  //add sync bar  2/2      
-/* final View root = findViewById(android.R.id.content);
-final SharedPreferences prefs = getSharedPreferences("sync_prefs", MODE_PRIVATE);
-final int[] lastProg = { -1 };
-final ProgressBar bar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-bar.setMax(10000);
-bar.setVisibility(View.GONE);
-((ViewGroup) getWindow().getDecorView()).addView(bar,
-        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                (int) (3 * getResources().getDisplayMetrics().density)));
-final TextView percent = new TextView(this);
-percent.setTextSize(12);
-percent.setVisibility(View.GONE);
-((ViewGroup) getWindow().getDecorView()).addView(percent);
-
-root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-    @Override
-    public void onGlobalLayout() {
-        TextView tv = findSync((ViewGroup) root);
-        if (tv == null || tv.getVisibility()!= View.VISIBLE) {
-            bar.setVisibility(View.GONE);
-            percent.setVisibility(View.GONE);
-            return;
-        }
-        
-// dynamic color
-int syncTextColor = tv.getCurrentTextColor();
-percent.setTextColor(syncTextColor);
-
-int btcColor = syncTextColor;   // <-- Declare it here.
-if (tv != null) {
-    btcColor = tv.getCurrentTextColor(); // actually = syncTextColor
-}
-bar.setProgressTintList(android.content.res.ColorStateList.valueOf(btcColor));
-bar.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(btcColor & 0x33FFFFFF));
-//end
-        int[] loc = new int[2];
-        tv.getLocationOnScreen(loc);
-        int left = loc[0];
-        int top = loc[1];
-        float d = getResources().getDisplayMetrics().density;
-
-        percent.setText(String.format(Locale.US, "%.2f%%", lastProg[0] / 100f));
-        percent.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        int percentW = percent.getMeasuredWidth();
-        int gap = (int)(8 * d);
-        int padEnd = (int)(8 * d);
-        int textW = (int) tv.getPaint().measureText(tv.getText().toString());
-        int wantedWidth = textW + gap + percentW + padEnd;
-
-        View qr = findQr((ViewGroup) root);
-        int qrLeft = qr!= null? getLeftOnScreen(qr) : root.getWidth();
-        int maxAllowed = Math.max(0, qrLeft - left - (int)(8 * d));
-        int barWidth = Math.min(wantedWidth, maxAllowed);
-
-        int percentX = left + textW + gap;
-        if (percentX + percentW > left + barWidth - padEnd) {
-            percentX = left + barWidth - padEnd - percentW;
-        }
-        percentX = Math.max(percentX, left + (int)(4 * d));
-
-        percent.setX(percentX);
-        
-        //Adjust the percentage according to the baseline of the word sync.
-        int tvBaseline = tv.getBaseline();
-        int pBaseline = percent.getBaseline();
-        if (tvBaseline > 0 && pBaseline > 0) {
-        percent.setY(top + tvBaseline - pBaseline);
-        } else {
-            
-      // fallback nếu baseline chưa có
-        percent.setY(top + tv.getHeight() - percent.getMeasuredHeight());
-        }
-        //end
-        
-        percent.setVisibility(View.VISIBLE);
-        bar.setX(left);
-        bar.setY(top + tv.getHeight() + (int)(4 * d));
-        bar.getLayoutParams().width = barWidth;
-        bar.setVisibility(View.VISIBLE);
-
-        String s = tv.getText().toString().toLowerCase();
-        int h = 0;
-        try {
-            int v = Integer.parseInt(s.replaceAll("[^0-9]", ""));
-            if (s.contains("hour")) h = v;
-            else if (s.contains("day")) h = v * 24;
-            else if (s.contains("week")) h = v * 7 * 24;
-            else if (s.contains("month")) h = v * 30 * 24;
-            else if (s.contains("year")) h = v * 365 * 24;
-        } catch (Exception ignored) {}
-        int max = prefs.getInt("max_hours", 0);
-        if (h > max) { max = h; prefs.edit().putInt("max_hours", max).apply(); }
-        if (h == 0 && max!= 0) { prefs.edit().remove("max_hours").apply(); max = 0; }
-        int prog = max > 0? (int)((max - h) * 10000L / max) : 0;
-        if (prog!= lastProg[0]) {
-            lastProg[0] = prog;
-            percent.setText(String.format(Locale.US, "%.2f%%", prog / 100f));
-            bar.setProgress(prog);
-        }
-    }
-
-    // Find the word "Synchronizing" on the screen, and use the sample color to color the sync bar.
-    private TextView findSync(ViewGroup g) {
-        for (int i = 0; i < g.getChildCount(); i++) {
-            View v = g.getChildAt(i);
-          //  if (v instanceof TextView && ((TextView) v).getText().toString().contains("Synchronizing"))
-        if (v instanceof TextView && ((TextView) v).getText().toString().contains(","))
-            return (TextView) v;
-            if (v instanceof ViewGroup) {
-                TextView t = findSync((ViewGroup) v);
-                if (t!= null) return t;
-            }
-        }
-        return null;
-    }
-
-//end//
-private TextView findTextViewWithText(ViewGroup g, String txt) {
-    for (int i = 0; i < g.getChildCount(); i++) {
-        View v = g.getChildAt(i);
-        if (v instanceof TextView && ((TextView) v).getText().toString().contains(txt))
-            return (TextView) v;
-        if (v instanceof ViewGroup) {
-            TextView t = findTextViewWithText((ViewGroup) v, txt);
-            if (t != null) return t;
-        }
-    }
-    return null;
-}
-    
-    private View findQr(ViewGroup g) {
-        for (int i = 0; i < g.getChildCount(); i++) {
-            View v = g.getChildAt(i);
-            if (v instanceof ImageView && v.getWidth() > 50 && v.getX() > g.getWidth() * 0.6)
-                return v;
-            if (v instanceof ViewGroup) {
-                View t = findQr((ViewGroup) v);
-                if (t!= null) return t;
-            }
-        }
-        return null;
-    }
-    private int getLeftOnScreen(View v) {
-        int[] l = new int[2];
-        v.getLocationOnScreen(l);
-        return l[0];
-    }
-}); */
-
- //add sync bar 2/2
-        
-  //add sync bar 2/2
 final View root = findViewById(android.R.id.content);
 final SharedPreferences prefs = getSharedPreferences("sync_prefs", MODE_PRIVATE);
 final int[] lastProg = { -1 };
 final ProgressBar[] barRef = new ProgressBar[1];
 final TextView[] percentRef = new TextView[1];
 
+// lấy string theo locale
+final String SYNC_KEY = getString(R.string.sync_keyword);
+final String H = getString(R.string.time_hour);
+final String D = getString(R.string.time_day);
+final String W = getString(R.string.time_week);
+final String M = getString(R.string.time_month);
+final String Y = getString(R.string.time_year);
+
 root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
     @Override
     public void onGlobalLayout() {
         TextView tv = findSync((ViewGroup) root);
 
-        // === FIX CHỒNG CHỮ ===
         boolean isSyncing = tv!= null && (
-            tv.getText().toString().contains("Synchronizing") ||
-            tv.getText().toString().contains("đồng bộ")
+            tv.getText().toString().contains(SYNC_KEY) ||
+            tv.getText().toString().toLowerCase().contains(",") // fallback
         );
         if (!isSyncing) {
             if (barRef[0]!= null) barRef[0].setVisibility(View.GONE);
             if (percentRef[0]!= null) percentRef[0].setVisibility(View.GONE);
             return;
         }
-        // === END FIX ===
 
         if ("wrapped".equals(tv.getTag())) {
             updateProgress(tv);
@@ -341,7 +195,7 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
                 topRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
 
                 TextView percent = new TextView(WalletActivity.this);
-                percent.setText("0.00%");
+                percent.setText(getString(R.string.sync_percent));
                 percent.setTextColor(tv.getCurrentTextColor());
                 percent.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, tv.getTextSize());
                 int pad = (int)(8 * getResources().getDisplayMetrics().density);
@@ -358,8 +212,8 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
 
                 ProgressBar bar = new ProgressBar(WalletActivity.this, null, android.R.attr.progressBarStyleHorizontal);
                 bar.setMax(10000);
-                int h = (int)(2.5f * getResources().getDisplayMetrics().density);
-                LinearLayout.LayoutParams lpBar = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h);
+                int hgt = (int)(2.5f * getResources().getDisplayMetrics().density);
+                LinearLayout.LayoutParams lpBar = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, hgt);
                 lpBar.topMargin = (int)(1.5f * getResources().getDisplayMetrics().density);
                 bar.setLayoutParams(lpBar);
                 bar.setProgressTintList(android.content.res.ColorStateList.valueOf(tv.getCurrentTextColor()));
@@ -379,9 +233,8 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
     private void updateProgress(TextView tv) {
         if (barRef[0] == null || percentRef[0] == null) return;
 
-        // ẩn nếu không còn sync
         String txt = tv.getText().toString().toLowerCase();
-        if (!txt.contains("synchronizing") &&!txt.contains("đồng bộ")) {
+        if (!txt.contains(SYNC_KEY.toLowerCase()) &&!txt.contains(",")) {
             barRef[0].setVisibility(View.GONE);
             percentRef[0].setVisibility(View.GONE);
             return;
@@ -393,18 +246,17 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
         int h = 0;
         try {
             int v = Integer.parseInt(txt.replaceAll("[^0-9]", ""));
-            if (txt.contains("hour") || txt.contains("giờ")) h = v;
-            else if (txt.contains("day") || txt.contains("ngày")) h = v * 24;
-            else if (txt.contains("week") || txt.contains("tuần")) h = v * 7 * 24;
-            else if (txt.contains("month") || txt.contains("tháng")) h = v * 30 * 24;
-            else if (txt.contains("year") || txt.contains("năm")) h = v * 365 * 24;
+            if (txt.contains(H.toLowerCase())) h = v;
+            else if (txt.contains(D.toLowerCase())) h = v * 24;
+            else if (txt.contains(W.toLowerCase())) h = v * 7 * 24;
+            else if (txt.contains(M.toLowerCase())) h = v * 30 * 24;
+            else if (txt.contains(Y.toLowerCase())) h = v * 365 * 24;
         } catch (Exception ignored) {}
         int max = prefs.getInt("max_hours", 0);
         if (h > max) { max = h; prefs.edit().putInt("max_hours", max).apply(); }
         if (h == 0 && max!= 0) { prefs.edit().remove("max_hours").apply(); max = 0; }
         int prog = max > 0? (int)((max - h) * 10000L / max) : 0;
 
-        // sync xong -> ẩn luôn
         if (prog >= 10000 || h == 0) {
             barRef[0].setVisibility(View.GONE);
             percentRef[0].setVisibility(View.GONE);
@@ -413,7 +265,7 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
 
         if (prog!= lastProg[0]) {
             lastProg[0] = prog;
-            percentRef[0].setText(String.format(Locale.US, "%.2f%%", prog / 100f));
+            percentRef[0].setText(String.format(Locale.US, getString(R.string.sync_percent_format), prog / 100f));
             percentRef[0].setTextColor(tv.getCurrentTextColor());
             percentRef[0].setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, tv.getTextSize());
             barRef[0].setProgress(prog);
@@ -428,8 +280,7 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
             View v = g.getChildAt(i);
             if (v instanceof TextView) {
                 String t = ((TextView) v).getText().toString();
-               // if (t.contains("Synchronizing") || t.contains("đồng bộ") || t.contains("BTC")) return (TextView) v;
-                if (t.contains(",") || t.contains("BTC")) return (TextView) v;
+                if (t.contains(SYNC_KEY) || t.toLowerCase().contains("synchronizing") || t.contains("BTC")) return (TextView) v;
             }
             if (v instanceof ViewGroup) {
                 TextView t = findSync((ViewGroup) v);
@@ -440,8 +291,6 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
     }
 });
 //end add sync bar
- 
-     //end add sync bar
         
         final View insetTopView = contentView.findViewWithTag("inset_top");
         if (insetTopView != null) {
