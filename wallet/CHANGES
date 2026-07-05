@@ -1,5 +1,14 @@
 v11.04 mod by buli
 
+* - 5/7/2026
++ Update language pack
+- Update string resources file 
+~ wallet/res/values-vi/strings.xml
+
+
+
+
+
 * - 2/7/2026
 + Add Create paper wallet
 
@@ -74,7 +83,7 @@ v11.04 mod by buli
 
 + Add bar sync block start app
 
-- Add code file wallet/src/wallet/ui/WalletActivity.java [ Add code line 76->84, add line 148->296 ]
+- Add code file wallet/src/wallet/ui/WalletActivity.java [ Add code line 76->84, add line 148->316 ]
 - Add code file wallet/res/values/strings.xml [add code line 526 --> 539]
 
 **------------**
