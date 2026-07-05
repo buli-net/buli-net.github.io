@@ -522,6 +522,18 @@
 <string name="tx_details_tap_to_copy">Chạm để sao chép</string>
 <!-- end TransactionDetailsActivity -->
 	
+<!-- Sync bar -->
+    <string name="sync_keyword">,</string>
+    
+    <string name="time_hour">giờ</string>
+    <string name="time_day">ngày</string>
+    <string name="time_week">tuần</string>
+    <string name="time_month">tháng</string>
+    <string name="time_year">năm</string>
+
+    <string name="sync_percent">0,00%%</string>
+    <string name="sync_percent_format">%.2f%%</string>
+<!-- end sync bar -->
 </resources>
 
 <!-- end -->
