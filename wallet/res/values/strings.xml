@@ -526,7 +526,7 @@
 <!-- sync bar -->
 
 <string name="sync_keyword">Synchronizing</string>
-    
+
 <string name="time_hour">hour</string>
 <string name="time_day">day</string>
 <string name="time_week">week</string>
