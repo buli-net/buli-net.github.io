@@ -525,7 +525,7 @@
 
 <!-- sync bar -->
 
-<string name="sync_keyword">,</string>
+<string name="sync_keyword">الشبكة</string>
 
 <string name="time_hour">ساعة</string>
 <string name="time_day">يوم</string>
