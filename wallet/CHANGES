@@ -4,9 +4,9 @@ v11.04 mod by buli
 + Update language pack
 - Update string resources file 
 ~ wallet/res/values-vi/strings.xml
-
-
-
+~ wallet/res/values-ar/strings.xml
+~ wallet/res/values-fr/strings.xml
+~ wallet/res/values-zh/strings.xml
 
 
 * - 2/7/2026
