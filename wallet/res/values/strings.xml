@@ -533,7 +533,7 @@
 <string name="time_month">month</string>
 <string name="time_year">year</string>
 
-<string name="sync_percent">0.00%%</string>
+<string name="sync_percent"></string>
 <string name="sync_percent_format">%.2f%%</string>
     
 <!-- end sync bar -->
