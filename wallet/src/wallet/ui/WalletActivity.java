@@ -81,7 +81,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import java.util.Locale;
-import android.view.ViewParent;
 //end
 
 public final class WalletActivity extends AbstractWalletActivity {
@@ -147,22 +146,18 @@ public final class WalletActivity extends AbstractWalletActivity {
         contentView = findViewById(android.R.id.content); 
 
 //add sync bar 2/2
-//add sync bar 2/2
+
+//add sync bar 2/2 - FIX CRASH
 final View root = findViewById(android.R.id.content);
 final SharedPreferences prefs = getSharedPreferences("sync_prefs", MODE_PRIVATE);
 final int[] lastProg = { -1 };
 final ProgressBar bar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
 bar.setMax(10000);
 bar.setVisibility(View.GONE);
-// FIX: không add vào decor nữa
-// ((ViewGroup) getWindow().getDecorView()).addView(bar,...);
 final TextView percent = new TextView(this);
 percent.setTextSize(12);
 percent.setVisibility(View.GONE);
-// FIX: không add vào decor nữa
-// ((ViewGroup) getWindow().getDecorView()).addView(percent);
 
-// FIX: lấy string từ resources, không hardcode
 final String KEY = getString(R.string.sync_keyword).toLowerCase();
 final String H = getString(R.string.time_hour).toLowerCase();
 final String D = getString(R.string.time_day).toLowerCase();
@@ -181,32 +176,40 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
             return;
         }
 
-// dynamic color
-int syncTextColor = tv.getCurrentTextColor();
-percent.setTextColor(syncTextColor);
+        int syncTextColor = tv.getCurrentTextColor();
+        percent.setTextColor(syncTextColor);
+        bar.setProgressTintList(android.content.res.ColorStateList.valueOf(syncTextColor));
+        bar.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(syncTextColor & 0x33FFFFFF));
 
-int btcColor = syncTextColor;
-bar.setProgressTintList(android.content.res.ColorStateList.valueOf(btcColor));
-bar.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(btcColor & 0x33FFFFFF));
-//end
-
-        // FIX: đưa bar + percent vào cùng parent với tv để cuộn theo
-        ViewGroup p = (ViewGroup) tv.getParent();
+        // FIX: bọc tv vào wrapper 1 lần duy nhất, tránh add vào parent lạ
         if (bar.getParent() == null) {
+            ViewGroup p = (ViewGroup) tv.getParent();
             int idx = p.indexOfChild(tv);
-            // thêm percent ngay sau tv, bar ngay dưới
-            p.addView(percent, idx + 1);
-            LinearLayout.LayoutParams lpP = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            percent.setLayoutParams(lpP);
+            p.removeView(tv);
 
-            p.addView(bar, idx + 2);
+            LinearLayout wrap = new LinearLayout(WalletActivity.this);
+            wrap.setOrientation(LinearLayout.VERTICAL);
+            wrap.setTag("sync_wrap");
+            wrap.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+            // hàng trên: tv + percent
+            LinearLayout row = new LinearLayout(WalletActivity.this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.addView(tv, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            row.addView(percent, new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+            wrap.addView(row);
             int h = (int)(3 * getResources().getDisplayMetrics().density);
-            ViewGroup.LayoutParams lpB = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h);
+            LinearLayout.LayoutParams lpB = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h);
+            lpB.topMargin = (int)(2 * getResources().getDisplayMetrics().density);
             bar.setLayoutParams(lpB);
+            wrap.addView(bar);
+
+            p.addView(wrap, idx);
         }
 
-        // FIX: bỏ toàn bộ setX/setY, đo vị trí tuyệt đối
         percent.setVisibility(View.VISIBLE);
         bar.setVisibility(View.VISIBLE);
 
@@ -214,7 +217,6 @@ bar.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(btc
         int h = 0;
         try {
             int v = Integer.parseInt(s.replaceAll("[^0-9]", ""));
-            // FIX: dùng string resource
             if (s.contains(H)) h = v;
             else if (s.contains(D)) h = v * 24;
             else if (s.contains(W)) h = v * 7 * 24;
@@ -227,18 +229,19 @@ bar.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(btc
         int prog = max > 0? (int)((max - h) * 10000L / max) : 0;
         if (prog!= lastProg[0]) {
             lastProg[0] = prog;
-            // FIX: dùng format từ strings.xml
             percent.setText(String.format(Locale.US, FMT, prog / 100f));
             bar.setProgress(prog);
         }
+        if (h == 0) { // sync xong thì gỡ
+            View w = root.findViewWithTag("sync_wrap");
+            if (w!= null) ((ViewGroup)w.getParent()).removeView(w);
+        }
     }
 
-    // Find the word "Synchronizing" on the screen, and use the sample color to color the sync bar.
     private TextView findSync(ViewGroup g) {
         for (int i = 0; i < g.getChildCount(); i++) {
             View v = g.getChildAt(i);
             if (v instanceof TextView) {
-                // FIX: không hardcode, so sánh không phân biệt hoa thường
                 String txt = ((TextView) v).getText().toString().toLowerCase();
                 if (txt.contains(KEY)) return (TextView) v;
             }
@@ -250,39 +253,11 @@ bar.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(btc
         return null;
     }
 
-//end//
-private TextView findTextViewWithText(ViewGroup g, String txt) {
-    for (int i = 0; i < g.getChildCount(); i++) {
-        View v = g.getChildAt(i);
-        if (v instanceof TextView && ((TextView) v).getText().toString().contains(txt))
-            return (TextView) v;
-        if (v instanceof ViewGroup) {
-            TextView t = findTextViewWithText((ViewGroup) v, txt);
-            if (t!= null) return t;
-        }
-    }
-    return null;
-}
-
-    private View findQr(ViewGroup g) {
-        for (int i = 0; i < g.getChildCount(); i++) {
-            View v = g.getChildAt(i);
-            if (v instanceof ImageView && v.getWidth() > 50 && v.getX() > g.getWidth() * 0.6)
-                return v;
-            if (v instanceof ViewGroup) {
-                View t = findQr((ViewGroup) v);
-                if (t!= null) return t;
-            }
-        }
-        return null;
-    }
-    private int getLeftOnScreen(View v) {
-        int[] l = new int[2];
-        v.getLocationOnScreen(l);
-        return l[0];
-    }
+    private TextView findTextViewWithText(ViewGroup g, String txt) {... } // giữ nguyên của mày
+    private View findQr(ViewGroup g) {... } // giữ nguyên
+    private int getLeftOnScreen(View v) {... } // giữ nguyên
 });
-     //end add sync bar
+//end add sync bar
 //end add sync bar
         
         final View insetTopView = contentView.findViewWithTag("inset_top");
