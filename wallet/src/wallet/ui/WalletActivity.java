@@ -148,13 +148,13 @@ public final class WalletActivity extends AbstractWalletActivity {
 
 //add sync bar 2/2
 
-//add sync bar 2/2
+//add sync bar 2/2 FINAL
 final View root = findViewById(android.R.id.content);
 final SharedPreferences prefs = getSharedPreferences("sync_prefs", MODE_PRIVATE);
 final int[] lastProg = { -1 };
 final ProgressBar[] barRef = new ProgressBar[1];
 final TextView[] percentRef = new TextView[1];
-final LinearLayout[] containerRef = new LinearLayout[1]; // <-- MỚI
+final LinearLayout[] containerRef = new LinearLayout[1];
 
 final String SYNC_KEY = getString(R.string.sync_keyword).toLowerCase();
 final String H = getString(R.string.time_hour).toLowerCase();
@@ -164,150 +164,85 @@ final String M = getString(R.string.time_month).toLowerCase();
 final String Y = getString(R.string.time_year).toLowerCase();
 
 root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-    @Override
-    public void onGlobalLayout() {
-        if (barRef[0]!= null && (barRef[0].getParent() == null || barRef[0].getWindowToken() == null)) {
-            barRef[0] = null;
-            percentRef[0] = null;
-            containerRef[0] = null;
-            lastProg[0] = -1;
-        }
-
+    @Override public void onGlobalLayout() {
         TextView tv = findSync((ViewGroup) root);
         boolean isSyncing = tv!= null;
 
-        // === FIX ẢNH CỦA MÀY: xóa hẳn container khi hết sync ===
         if (!isSyncing) {
             if (containerRef[0]!= null) {
-                ViewParent p = containerRef[0].getParent();
+                android.view.ViewParent p = containerRef[0].getParent();
                 if (p instanceof ViewGroup) ((ViewGroup)p).removeView(containerRef[0]);
-                containerRef[0] = null;
+                containerRef[0] = null; barRef[0]=null; percentRef[0]=null; lastProg[0]=-1;
             }
-            barRef[0] = null;
-            percentRef[0] = null;
-            lastProg[0] = -1;
             return;
         }
 
-        if ("wrapped".equals(tv.getTag()) && barRef[0] == null) {
-            tv.setTag(null);
-        }
-
-        if ("wrapped".equals(tv.getTag())) {
-            updateProgress(tv);
-            return;
-        }
+        if ("wrapped".equals(tv.getTag()) && barRef[0]!= null) { updateProgress(tv); return; }
         tv.setTag("wrapped");
 
         tv.post(() -> {
             try {
-                ViewGroup header = (ViewGroup) tv.getParent();
-                if (header == null) return;
+                ViewGroup header = (ViewGroup) tv.getParent(); if (header==null) return;
+                int idx = header.indexOfChild(tv); header.removeView(tv);
+                tv.setPaintFlags(tv.getPaintFlags() & ~android.graphics.Paint.UNDERLINE_TEXT_FLAG);
 
                 LinearLayout container = new LinearLayout(WalletActivity.this);
                 container.setOrientation(LinearLayout.VERTICAL);
-                container.setLayoutParams(tv.getLayoutParams());
-
                 LinearLayout topRow = new LinearLayout(WalletActivity.this);
                 topRow.setOrientation(LinearLayout.HORIZONTAL);
                 topRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
 
                 TextView percent = new TextView(WalletActivity.this);
-                percent.setText(getString(R.string.sync_percent));
+                percent.setText(""); // <-- KHÔNG set 0.00% ban đầu
                 percent.setTextColor(tv.getCurrentTextColor());
                 percent.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, tv.getTextSize());
-                int pad = (int)(8 * getResources().getDisplayMetrics().density);
-                percent.setPadding(pad, 0, 0, 0);
-                percent.setGravity(android.view.Gravity.CENTER_VERTICAL);
+                percent.setPadding((int)(8*getResources().getDisplayMetrics().density),0,0,0);
 
-                int idx = header.indexOfChild(tv);
-                header.removeView(tv);
-                tv.setPaintFlags(tv.getPaintFlags() & ~android.graphics.Paint.UNDERLINE_TEXT_FLAG);
-
-                topRow.addView(tv, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+                topRow.addView(tv, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT,1f));
                 topRow.addView(percent, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-                ProgressBar bar = new ProgressBar(WalletActivity.this, null, android.R.attr.progressBarStyleHorizontal);
+                ProgressBar bar = new ProgressBar(WalletActivity.this,null,android.R.attr.progressBarStyleHorizontal);
                 bar.setMax(10000);
-                int hgt = (int)(2.5f * getResources().getDisplayMetrics().density);
-                LinearLayout.LayoutParams lpBar = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, hgt);
-                lpBar.topMargin = (int)(1.5f * getResources().getDisplayMetrics().density);
-                bar.setLayoutParams(lpBar);
-                bar.setProgressTintList(android.content.res.ColorStateList.valueOf(tv.getCurrentTextColor()));
-                bar.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(tv.getCurrentTextColor() & 0x33FFFFFF));
+                int h = (int)(2.5f*getResources().getDisplayMetrics().density);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,h);
+                lp.topMargin = (int)(1.5f*getResources().getDisplayMetrics().density);
+                bar.setLayoutParams(lp);
 
-                container.addView(topRow);
-                container.addView(bar);
+                container.addView(topRow); container.addView(bar);
                 header.addView(container, idx);
 
-                containerRef[0] = container; // <-- LƯU LẠI
-                barRef[0] = bar;
-                percentRef[0] = percent;
-
-                tv.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-                percent.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-                container.requestLayout();
-
+                containerRef[0]=container; barRef[0]=bar; percentRef[0]=percent;
+                tv.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
+                percent.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
                 updateProgress(tv);
-            } catch (Exception ignored) {}
+            } catch(Exception ignored){}
         });
     }
 
-    private void updateProgress(TextView tv) {
-        if (barRef[0] == null || percentRef[0] == null) return;
+    private void updateProgress(TextView tv){
+        if(barRef[0]==null) return;
         String txt = tv.getText().toString().toLowerCase();
-        if (!txt.contains(SYNC_KEY)) {
-            if (containerRef[0]!= null) {
-                ViewParent p = containerRef[0].getParent();
-                if (p instanceof ViewGroup) ((ViewGroup)p).removeView(containerRef[0]);
-                containerRef[0] = null;
-            }
-            return;
-        }
-        barRef[0].setVisibility(View.VISIBLE);
-        percentRef[0].setVisibility(View.VISIBLE);
-
-        int h = 0;
-        try {
-            int v = Integer.parseInt(txt.replaceAll("[^0-9]", ""));
-            if (txt.contains(H)) h = v;
-            else if (txt.contains(D)) h = v * 24;
-            else if (txt.contains(W)) h = v * 7 * 24;
-            else if (txt.contains(M)) h = v * 30 * 24;
-            else if (txt.contains(Y)) h = v * 365 * 24;
-        } catch (Exception ignored) {}
-        int max = prefs.getInt("max_hours", 0);
-        if (h > max) { max = h; prefs.edit().putInt("max_hours", max).apply(); }
-        if (h == 0 && max!= 0) { prefs.edit().remove("max_hours").apply(); max = 0; }
-        int prog = max > 0? (int)((max - h) * 10000L / max) : 0;
-
-        if (prog >= 10000 || h == 0) {
-            barRef[0].setVisibility(View.GONE);
-            percentRef[0].setVisibility(View.GONE);
-            return;
-        }
-        if (prog!= lastProg[0]) {
-            lastProg[0] = prog;
-            percentRef[0].setText(String.format(java.util.Locale.US, getString(R.string.sync_percent_format), prog / 100f));
-            percentRef[0].setTextColor(tv.getCurrentTextColor());
+        int h=0; try{int v=Integer.parseInt(txt.replaceAll("[^0-9]",""));
+            if(txt.contains(H))h=v; else if(txt.contains(D))h=v*24; else if(txt.contains(W))h=v*7*24;
+            else if(txt.contains(M))h=v*30*24; else if(txt.contains(Y))h=v*365*24;
+        }catch(Exception ignored){}
+        int max=prefs.getInt("max_hours",0); if(h>max){max=h; prefs.edit().putInt("max_hours",max).apply();}
+        if(h==0&&max!=0){prefs.edit().remove("max_hours").apply(); max=0;}
+        int prog=max>0?(int)((max-h)*10000L/max):0;
+        if(prog!=lastProg[0]){lastProg[0]=prog;
+            percentRef[0].setText(String.format(java.util.Locale.US, getString(R.string.sync_percent_format), prog/100f));
             barRef[0].setProgress(prog);
         }
-        tv.postDelayed(() -> updateProgress(tv), 500);
+        tv.postDelayed(()->updateProgress(tv),800);
     }
 
-    private TextView findSync(ViewGroup g) {
-        for (int i = 0; i < g.getChildCount(); i++) {
-            View v = g.getChildAt(i);
-            if (v instanceof TextView) {
-                String t = ((TextView) v).getText().toString().toLowerCase();
-                if (t.contains(SYNC_KEY)) return (TextView) v;
+    private TextView findSync(ViewGroup g){
+        for(int i=0;i<g.getChildCount();i++){View v=g.getChildAt(i);
+            if(v instanceof TextView){String t=((TextView)v).getText().toString().toLowerCase();
+                if(t.contains(SYNC_KEY)) return (TextView)v;
             }
-            if (v instanceof ViewGroup) {
-                TextView t = findSync((ViewGroup) v);
-                if (t!= null) return t;
-            }
-        }
-        return null;
+            if(v instanceof ViewGroup){TextView t=findSync((ViewGroup)v); if(t!=null) return t;}
+        } return null;
     }
 });
 //end add sync bar
