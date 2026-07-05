@@ -147,7 +147,8 @@ public final class WalletActivity extends AbstractWalletActivity {
 
 //add sync bar 2/2
 
-//add sync bar 2/2 - AUTO WIDTH
+
+//add sync bar 2/2 - FINAL CENTERED
 final View root = findViewById(android.R.id.content);
 final SharedPreferences prefs = getSharedPreferences("sync_prefs", MODE_PRIVATE);
 final int[] lastProg = { -1 };
@@ -186,9 +187,12 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
             int idx = p.indexOfChild(tv);
             p.removeView(tv);
 
+            float d = getResources().getDisplayMetrics().density;
+
             LinearLayout wrap = new LinearLayout(WalletActivity.this);
             wrap.setOrientation(LinearLayout.VERTICAL);
-            wrap.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
+            wrap.setGravity(android.view.Gravity.CENTER);
+            wrap.setPadding(0, (int)(24 * d), 0, (int)(16 * d));
             wrap.setTag("sync_wrap");
             wrap.setLayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -198,27 +202,27 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
             row.setGravity(android.view.Gravity.CENTER);
             row.addView(tv, new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            row.addView(percent, new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+            LinearLayout.LayoutParams lpPercent = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lpPercent.leftMargin = (int)(8 * d);
+            row.addView(percent, lpPercent);
             wrap.addView(row);
 
-            // --- AUTO WIDTH như code gốc ---
-            float d = getResources().getDisplayMetrics().density;
+            // AUTO WIDTH
             int textW = (int) tv.getPaint().measureText(tv.getText().toString());
             percent.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             int percentW = percent.getMeasuredWidth();
-            int gap = (int)(8 * d);
-            int padEnd = (int)(8 * d);
-            int wantedWidth = textW + gap + percentW + padEnd;
+            int wantedWidth = textW + (int)(8 * d) + percentW + (int)(8 * d);
 
             View qr = findQr((ViewGroup) root);
             int qrLeft = qr!= null? getLeftOnScreen(qr) : root.getWidth();
-            int maxAllowed = Math.max(0, qrLeft - (int)(16 * d)); // chừa 16dp mép phải
+            int maxAllowed = Math.max(0, qrLeft - (int)(16 * d));
             int barW = Math.min(wantedWidth, maxAllowed);
 
             int h = (int)(3 * d);
             LinearLayout.LayoutParams lpB = new LinearLayout.LayoutParams(barW, h);
-            lpB.topMargin = (int)(2 * d);
+            lpB.topMargin = (int)(6 * d);
             lpB.gravity = android.view.Gravity.CENTER_HORIZONTAL;
             bar.setLayoutParams(lpB);
             wrap.addView(bar);
