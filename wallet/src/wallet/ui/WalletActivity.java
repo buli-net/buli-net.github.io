@@ -147,6 +147,8 @@ public final class WalletActivity extends AbstractWalletActivity {
 
 //add sync bar 2/2
 
+
+//add sync bar 2/2
 final View root = findViewById(android.R.id.content);
 final SharedPreferences prefs = getSharedPreferences("sync_prefs", MODE_PRIVATE);
 final int[] lastProg = { -1 };
@@ -163,7 +165,7 @@ final String Y = getString(R.string.time_year).toLowerCase();
 root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
     @Override
     public void onGlobalLayout() {
-        // === FIX RESET: nếu bar cũ bị detach thì reset ===
+        // reset nếu bar cũ chết sau reset blockchain
         if (barRef[0]!= null && (barRef[0].getParent() == null || barRef[0].getWindowToken() == null)) {
             barRef[0] = null;
             percentRef[0] = null;
@@ -171,8 +173,7 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
         }
 
         TextView tv = findSync((ViewGroup) root);
-        String tvText = tv!= null? tv.getText().toString().toLowerCase() : "";
-        boolean isSyncing = tv!= null && tvText.contains(SYNC_KEY);
+        boolean isSyncing = tv!= null;
 
         if (!isSyncing) {
             if (barRef[0]!= null) barRef[0].setVisibility(View.GONE);
@@ -180,9 +181,8 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
             return;
         }
 
-        // nếu tv đã wrap nhưng bar chết -> unwrap lại
         if ("wrapped".equals(tv.getTag()) && barRef[0] == null) {
-            tv.setTag(null);
+            tv.setTag(null); // bar chết thì wrap lại
         }
 
         if ("wrapped".equals(tv.getTag())) {
@@ -211,7 +211,6 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
                 int pad = (int)(8 * getResources().getDisplayMetrics().density);
                 percent.setPadding(pad, 0, 0, 0);
                 percent.setGravity(android.view.Gravity.CENTER_VERTICAL);
-                percent.setPaintFlags(percent.getPaintFlags() & ~android.graphics.Paint.UNDERLINE_TEXT_FLAG);
 
                 int idx = header.indexOfChild(tv);
                 header.removeView(tv);
@@ -290,7 +289,8 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
             View v = g.getChildAt(i);
             if (v instanceof TextView) {
                 String t = ((TextView) v).getText().toString().toLowerCase();
-                if (t.contains(SYNC_KEY) || t.contains("btc")) return (TextView) v;
+                // FIX QUAN TRỌNG: chỉ tìm đúng SYNC_KEY, bỏ "btc"
+                if (t.contains(SYNC_KEY)) return (TextView) v;
             }
             if (v instanceof ViewGroup) {
                 TextView t = findSync((ViewGroup) v);
@@ -300,6 +300,7 @@ root.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlob
         return null;
     }
 });
+//end add sync bar
 
 //end add sync bar
         
