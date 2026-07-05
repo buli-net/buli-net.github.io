@@ -525,7 +525,7 @@
 
 <!-- sync bar -->
 
-<string name="sync_keyword">جاري</string>
+<string name="sync_keyword">مزامنة مع الشبكة،</string>
 
 <string name="time_hour">ساعة</string>
 <string name="time_day">يوم</string>
