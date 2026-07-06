@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:background="@color/tx_page_bg">
 
-    <!-- HEADER - giờ sẽ cuộn -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -64,7 +63,6 @@
         </androidx.cardview.widget.CardView>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- NỘI DUNG CUỘN -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -77,7 +75,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- Sender / Receiver card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -128,7 +125,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Transaction details card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -216,7 +212,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Input / Output full list card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -264,7 +259,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Transaction ID card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
