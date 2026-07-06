@@ -35,14 +35,12 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import org.bitcoinj.base.Coin;
 import org.bitcoinj.base.Sha256Hash;
-import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionConfidence;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.core.TransactionWitness;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptException;
 import org.bitcoinj.script.ScriptPattern;
@@ -196,7 +194,7 @@ public class TransactionDetailsActivity extends Activity {
         }
         tvMeta.setText(size + " bytes · " + weight + " wu" + feeRate + (rbf ? " · RBF" : ""));
 
-        // ====== PHẦN FIX: LẤY ĐỊA CHỈ GỬI/NHẬN ======
+        // ----- Lấy địa chỉ gửi/nhận (chỉ từ connectedOutput) -----
         String actualFrom = null;
         String actualTo = null;
         try {
@@ -218,7 +216,7 @@ public class TransactionDetailsActivity extends Activity {
         copyOnClick(tvActualFrom, actualFrom);
         copyOnClick(tvActualTo, actualTo);
 
-        // Full input list
+        // ----- Danh sách đầu vào đầy đủ -----
         StringBuilder fromSb = new StringBuilder();
         Coin totalFrom = Coin.ZERO;
         int inCount = 0;
@@ -246,7 +244,7 @@ public class TransactionDetailsActivity extends Activity {
 
         String fromText = getString(R.string.tx_details_total_from, totalFrom.toPlainString(), inCount) + "\n" + fromSb.toString().trim();
         
-        // Full output list
+        // ----- Danh sách đầu ra đầy đủ -----
         StringBuilder toSb = new StringBuilder();
         Coin totalTo = Coin.ZERO;
         int outCount = tx.getOutputs() != null ? tx.getOutputs().size() : 0;
@@ -331,13 +329,10 @@ public class TransactionDetailsActivity extends Activity {
     }
 
     /**
-     * Lấy địa chỉ từ một input.
-     * - Nếu có connectedOutput: dùng scriptPubKey và kiểm tra mineOnly (nếu có) qua connected.isMine()
-     * - Nếu không có connectedOutput: chỉ trả về nếu mineOnly == null (không yêu cầu lọc)
-     * - Trích xuất từ scriptSig (P2PKH) hoặc witness (P2WPKH)
+     * Lấy địa chỉ từ một input (chỉ dùng connectedOutput).
+     * Nếu không có connectedOutput, trả về null.
      */
     private String getAddressFromInput(TransactionInput in, NetworkParameters params, Wallet wallet, Boolean mineOnly) {
-        // 1. Thử từ connected output
         TransactionOutPoint outpoint = in.getOutpoint();
         if (outpoint != null) {
             TransactionOutput connected = outpoint.getConnectedOutput();
@@ -351,34 +346,6 @@ public class TransactionDetailsActivity extends Activity {
                 }
             }
         }
-
-        // Nếu không có connectedOutput hoặc không thỏa mineOnly, chỉ trả về nếu không yêu cầu lọc
-        if (mineOnly != null) return null;
-
-        // 2. Thử từ scriptSig (P2PKH)
-        Script scriptSig = in.getScriptSig();
-        if (scriptSig != null && ScriptPattern.isP2PKHInput(scriptSig)) {
-            try {
-                byte[] pubKey = ScriptPattern.extractPubKeyFromScriptSig(scriptSig);
-                if (pubKey != null) {
-                    ECKey key = ECKey.fromPublicOnly(pubKey);
-                    return key.toAddress(params).toString();
-                }
-            } catch (Exception ignored) {}
-        }
-
-        // 3. Thử từ witness (P2WPKH)
-        TransactionWitness witness = in.getWitness();
-        if (witness != null && witness.getPushCount() >= 2) {
-            byte[] last = witness.getPush(witness.getPushCount() - 1);
-            if (last != null && (last.length == 33 || last.length == 65)) {
-                try {
-                    ECKey key = ECKey.fromPublicOnly(last);
-                    return key.toAddress(params).toString();
-                } catch (Exception ignored) {}
-            }
-        }
-
         return null;
     }
 
