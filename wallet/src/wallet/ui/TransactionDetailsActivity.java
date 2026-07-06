@@ -35,7 +35,6 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import org.bitcoinj.base.Coin;
 import org.bitcoinj.base.Sha256Hash;
-import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionConfidence;
@@ -236,7 +235,10 @@ public class TransactionDetailsActivity extends Activity {
                         type = getAddressType(addr, connected.getScriptPubKey());
                     } else {
                         String witAddr = getInputAddress(tx, params, wallet, null);
-                        if (witAddr != null) addr = witAddr;
+                        if (witAddr != null) {
+                            addr = witAddr;
+                            type = getAddressType(addr, null);
+                        }
                     }
                 } catch (Exception ignored) {}
                 if (v != null) totalFrom = totalFrom.add(v);
@@ -348,8 +350,8 @@ public class TransactionDetailsActivity extends Activity {
                 }
                 if (in.getWitness() != null && in.getWitness().getPushCount() >= 2) {
                     byte[] pubkey = in.getWitness().getPush(1);
-                    ECKey key = ECKey.fromPublicOnly(pubkey);
-                    return key.toAddress(params).toString();
+                    byte[] hash160 = org.bitcoinj.core.Utils.sha256hash160(pubkey);
+                    return org.bitcoinj.core.SegwitAddress.fromHash(params, hash160).toString();
                 }
                 if (mineOnly == null) {
                     try {
@@ -480,7 +482,7 @@ public class TransactionDetailsActivity extends Activity {
 
         qrDialogImageView = new ImageView(this);
         qrDialogImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        qrDialogImageView.setPadding(48, 48, 48);
+        qrDialogImageView.setPadding(48, 48, 48, 48);
         LinearLayout.LayoutParams imgLp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
         qrDialogImageView.setLayoutParams(imgLp);
@@ -530,7 +532,7 @@ public class TransactionDetailsActivity extends Activity {
 
         TextView tv = new TextView(this);
         tv.setText(label);
-        tv.setTextColor(dark ? 0xFFBBBBBB : 0xFF666666);
+        tv.setTextColor(dark ? 0xFFBBBBBB : 0xFF666);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         tv.setGravity(Gravity.CENTER);
         tv.setPadding(0, 8, 0, 0);
@@ -560,7 +562,7 @@ public class TransactionDetailsActivity extends Activity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 values.clear();
                 values.put(MediaStore.Images.Media.IS_PENDING, 0);
-                getContentResolver().update(uri, values, null, null);
+                getContentResolver().update(uri, values, null);
             }
             Toast.makeText(this, getString(R.string.tx_details_saved_to_pictures), Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
