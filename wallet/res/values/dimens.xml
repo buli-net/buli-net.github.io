@@ -25,4 +25,9 @@
     <dimen name="shortcut_padding">2dp</dimen>
     <dimen name="shortcut_size">48dp</dimen>
     <dimen name="shortcut_icon_size">32dp</dimen>
+
+    <!-- cardview -->
+    <dimen name="cardview_compat_inset_shadow">1dp</dimen>
+    <dimen name="cardview_default_elevation">2dp</dimen>
+    <dimen name="cardview_default_radius">2dp</dimen>
 </resources>
