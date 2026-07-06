@@ -56,7 +56,7 @@ import java.util.Map;
 import wallet.R;
 import wallet.WalletApplication;
 
-import org.bitcoinj.core.SegwitAddress;
+import org.bitcoinj.base.SegwitAddress;
 import org.bitcoinj.core.Utils;
 
 public class TransactionDetailsActivity extends Activity {
