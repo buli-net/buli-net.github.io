@@ -624,10 +624,12 @@ qrDialog.getWindow().getDecorView().setSystemUiVisibility(
         BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, size, size, hints);
         int w = bitMatrix.getWidth();
         int h = bitMatrix.getHeight();
-        Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
+      //  Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565); // color 16 bit
+        Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888); // color 32 bit
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
-                bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+             //   bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.TRANSPARENT);
             }
         }
         return bmp;
