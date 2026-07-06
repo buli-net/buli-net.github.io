@@ -33,7 +33,7 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
-import org.bitcoinj.core.Coin;
+import org.bitcoinj.base.Coin;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
