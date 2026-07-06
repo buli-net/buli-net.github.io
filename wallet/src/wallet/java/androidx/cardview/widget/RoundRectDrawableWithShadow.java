@@ -30,9 +30,8 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 
-//import androidx.annotation.Nullable;
-//import androidx.cardview.R;
-import wallet.R;
+import androidx.annotation.Nullable;
+import androidx.cardview.R;
 
 /**
  * A rounded rectangle drawable which also includes a shadow around.
@@ -374,7 +373,7 @@ class RoundRectDrawableWithShadow extends Drawable {
         return content + (mRawMaxShadowSize * SHADOW_MULTIPLIER + mInsetShadow) * 2;
     }
 
-    void setColor(ColorStateList color) {
+    void setColor(@Nullable ColorStateList color) {
         setBackground(color);
         invalidateSelf();
     }
