@@ -243,11 +243,13 @@ public class TransactionDetailsActivity extends Activity {
                 } catch (Exception ignored) {}
                 if (v != null) totalFrom = totalFrom.add(v);
                 fromSb.append(addr).append(" (").append(type).append(") - ")
-                      .append(v != null ? v.toPlainString() + " BTC" : "? BTC").append("\n");
+                      .append(v != null ? v.toPlainString() + " BTC" : "? BTC").append("
+");
             }
         }
 
-        String fromText = getString(R.string.tx_details_total_from, totalFrom.toPlainString(), inCount) + "\n" + fromSb.toString().trim();
+        String fromText = getString(R.string.tx_details_total_from, totalFrom.toPlainString(), inCount) + "
+" + fromSb.toString().trim();
         
         StringBuilder toSb = new StringBuilder();
         Coin totalTo = Coin.ZERO;
@@ -260,11 +262,13 @@ public class TransactionDetailsActivity extends Activity {
                 if (addr == null) addr = "unknown";
                 String type = getAddressType(addr, out.getScriptPubKey());
                 toSb.append(addr).append(" (").append(type).append(") - ")
-                    .append(v != null ? v.toPlainString() + " BTC" : "? BTC").append("\n");
+                    .append(v != null ? v.toPlainString() + " BTC" : "? BTC").append("
+");
             }
         }
 
-        String toText = getString(R.string.tx_details_total_to, totalTo.toPlainString(), outCount) + "\n" + toSb.toString().trim();
+        String toText = getString(R.string.tx_details_total_to, totalTo.toPlainString(), outCount) + "
+" + toSb.toString().trim();
         
         tvFrom.setSingleLine(false);
         tvTo.setSingleLine(false);
@@ -410,21 +414,43 @@ public class TransactionDetailsActivity extends Activity {
 
     private String buildLiveTxText() {
         String ageStr = getTv(tvAge);
-        return getString(R.string.qr_direction) + ": " + getTv(tvDirection) + "\n"
-                + getString(R.string.qr_amount) + ": " + getTv(tvAmount) + "\n\n"
-                + getString(R.string.qr_sender_receiver) + "\n"
-                + getString(R.string.qr_from) + ": " + getTv(tvActualFrom) + "\n"
-                + getString(R.string.qr_to) + ": " + getTv(tvActualTo) + "\n\n"
-                + getString(R.string.qr_tx_details) + "\n"
-                + getString(R.string.qr_status) + ": " + getTv(tvStatus) + "\n"
-                + getString(R.string.qr_fee) + ": " + getTv(tvFee) + "\n"
-                + getString(R.string.qr_size_weight) + ": " + getTv(tvMeta) + "\n"
-                + getString(R.string.qr_confirmations) + ": " + getTv(tvHeight) + "\n"
-                + getString(R.string.qr_time) + ": " + getTv(tvTime) + "\n"
-                + getString(R.string.qr_age) + ": " + ageStr + "\n\n"
-                + getString(R.string.qr_sent_details) + "\n" + getTv(tvFrom) + "\n\n"
-                + getString(R.string.qr_received_details) + "\n" + getTv(tvTo) + "\n\n"
-                + getString(R.string.qr_txid) + "\n" + getTv(tvTxid);
+        return getString(R.string.qr_direction) + ": " + getTv(tvDirection) + "
+"
+                + getString(R.string.qr_amount) + ": " + getTv(tvAmount) + "
+
+"
+                + getString(R.string.qr_sender_receiver) + "
+"
+                + getString(R.string.qr_from) + ": " + getTv(tvActualFrom) + "
+"
+                + getString(R.string.qr_to) + ": " + getTv(tvActualTo) + "
+
+"
+                + getString(R.string.qr_tx_details) + "
+"
+                + getString(R.string.qr_status) + ": " + getTv(tvStatus) + "
+"
+                + getString(R.string.qr_fee) + ": " + getTv(tvFee) + "
+"
+                + getString(R.string.qr_size_weight) + ": " + getTv(tvMeta) + "
+"
+                + getString(R.string.qr_confirmations) + ": " + getTv(tvHeight) + "
+"
+                + getString(R.string.qr_time) + ": " + getTv(tvTime) + "
+"
+                + getString(R.string.qr_age) + ": " + ageStr + "
+
+"
+                + getString(R.string.qr_sent_details) + "
+" + getTv(tvFrom) + "
+
+"
+                + getString(R.string.qr_received_details) + "
+" + getTv(tvTo) + "
+
+"
+                + getString(R.string.qr_txid) + "
+" + getTv(tvTxid);
     }
     
     private String getTv(TextView tv) {
@@ -520,7 +546,7 @@ public class TransactionDetailsActivity extends Activity {
         col.setLayoutParams(lp);
         col.setClickable(true);
         col.setOnClickListener(onClick);
-        col.setPadding(8, 8, 8);
+        col.setPadding(8, 8, 8, 8);
 
         ImageView iv = new ImageView(this);
         iv.setImageResource(iconRes);
@@ -562,7 +588,7 @@ public class TransactionDetailsActivity extends Activity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 values.clear();
                 values.put(MediaStore.Images.Media.IS_PENDING, 0);
-                getContentResolver().update(uri, values, null);
+                getContentResolver().update(uri, values, null, null);
             }
             Toast.makeText(this, getString(R.string.tx_details_saved_to_pictures), Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
@@ -573,7 +599,9 @@ public class TransactionDetailsActivity extends Activity {
     private void shareTx() {
         try {
             String txid = tx != null ? tx.getTxId().toString() : getTv(tvTxid);
-            String shareText = buildLiveTxText() + "\n\nhttps://mempool.space/tx/" + txid;
+            String shareText = buildLiveTxText() + "
+
+https://mempool.space/tx/" + txid;
             Intent i = new Intent(Intent.ACTION_SEND);
             i.setType("text/plain");
             i.putExtra(Intent.EXTRA_TEXT, shareText);
@@ -596,7 +624,7 @@ public class TransactionDetailsActivity extends Activity {
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.MARGIN, 1);
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-        BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, size, hints);
+        BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, size, size, hints);
         int w = bitMatrix.getWidth();
         int h = bitMatrix.getHeight();
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
