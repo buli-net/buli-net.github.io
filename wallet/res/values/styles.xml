@@ -162,7 +162,7 @@
 
     <!-- cardview -->
     <style name="CardView" parent="">
-        <item name="cardViewStyle">@style/CardView.Light</item>
+        <item name="vendoredCardViewStyle">@style/CardView</item>
     </style>
     <style name="CardView.Light" parent="">
         <item name="cardBackgroundColor">@color/cardview_light_background</item>
