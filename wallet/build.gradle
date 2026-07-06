@@ -12,6 +12,10 @@ configurations {
 dependencies {
 
     implementation "androidx.print:print:1.0.0" // add Create paper wallet
+
+implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
+implementation 'com.google.android.material:material:1.6.1'   // thay 1.11.0 → 1.9.0
+    
     implementation 'androidx.annotation:annotation:1.10.0'
     implementation 'androidx.core:core:1.18.0'
     implementation 'androidx.activity:activity:1.13.0'
