@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="@color/tx_page_bg">
 
-    <!-- HEADER -->
+    <!-- HEADER GHIM - Card gốc của mày, chỉ thêm elevation 4dp để tạo bóng "rời ra" -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,7 +15,6 @@
         app:cardBackgroundColor="@color/tx_card_bg"
         android:layout_margin="8dp"
         android:layout_marginBottom="4dp">
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -58,7 +57,7 @@
     </androidx.cardview.widget.CardView>
 
     <!-- NỘI DUNG CUỘN -->
-    <androidx.core.widget.NestedScrollView
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -70,10 +69,228 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- dán nguyên phần từ dòng 200 của mày trở xuống vào đây -->
-            <!-- ví dụ: CardView Received details, CardView Transaction ID... -->
-            <!-- ... giữ nguyên tất cả các view có id tv_to, tv_txid, tv_txid_copy ... -->
+            <!-- Sender / Receiver card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/tx_card_bg"
+                android:layout_marginBottom="8dp">
+                <LinearLayout
+                    android:padding="16dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView android:text="@string/tx_details_sender_receiver"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="@color/tx_text_primary"
+                        android:layout_marginBottom="12dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView android:text="@string/tx_details_from"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:textColor="@color/tx_text_secondary"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <TextView android:id="@+id/tv_actual_from"
+                        android:textColor="@color/tx_text_primary"
+                        android:textIsSelectable="true"
+                        android:fontFamily="monospace"
+                        android:textSize="13sp"
+                        android:layout_marginTop="4dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="#33000000"/>
+                    <TextView android:text="@string/tx_details_to"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:textColor="@color/tx_text_secondary"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <TextView android:id="@+id/tv_actual_to"
+                        android:textColor="@color/tx_text_primary"
+                        android:textIsSelectable="true"
+                        android:fontFamily="monospace"
+                        android:textSize="13sp"
+                        android:layout_marginTop="4dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Transaction details card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/tx_card_bg"
+                android:layout_marginBottom="8dp">
+                <LinearLayout
+                    android:padding="16dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView android:text="@string/tx_details_transaction_details"
+                        android:textStyle="bold"
+                        android:textColor="@color/tx_text_primary"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="12dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                    <LinearLayout android:orientation="horizontal"
+                        android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="@string/tx_details_status"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="120dp" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tv_status"
+                            android:textStyle="bold"
+                            android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="@string/tx_details_fee"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="120dp" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tv_fee"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="@string/tx_details_size_weight"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="120dp" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tv_meta"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="@string/tx_details_confirmations"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="120dp" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tv_height"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="@string/tx_details_time"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="120dp" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tv_time"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="@string/tx_details_age"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="120dp" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tv_age"
+                            android:textColor="@color/tx_text_secondary"
+                            android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Input / Output full list card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/tx_card_bg"
+                android:layout_marginBottom="8dp">
+                <LinearLayout
+                    android:padding="16dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView android:text="@string/tx_details_sent_details"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="@color/tx_text_primary"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <TextView android:id="@+id/tv_from"
+                        android:textColor="@color/tx_text_secondary"
+                        android:textIsSelectable="true"
+                        android:fontFamily="monospace"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="2dp"
+                        android:breakStrategy="simple"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="12dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#33000000"/>
+                    <TextView android:text="@string/tx_details_received_details"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="@color/tx_text_primary"
+                        android:layout_marginTop="12dp"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <TextView android:id="@+id/tv_to"
+                        android:textColor="@color/tx_text_secondary"
+                        android:textIsSelectable="true"
+                        android:fontFamily="monospace"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="2dp"
+                        android:breakStrategy="simple"
+                        android:layout_marginTop="4dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Transaction ID card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/tx_card_bg">
+                <LinearLayout
+                    android:padding="16dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView android:text="@string/tx_details_transaction_id"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="@color/tx_text_primary"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <TextView android:id="@+id/tv_txid"
+                        android:textColor="@color/tx_text_secondary"
+                        android:textIsSelectable="true"
+                        android:fontFamily="monospace"
+                        android:layout_marginTop="4dp"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    <TextView android:id="@+id/tv_txid_copy"
+                        android:text="@string/tx_details_tap_to_copy"
+                        android:textColor="@color/tx_text_secondary"
+                        android:textSize="12sp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:layout_marginTop="4dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </ScrollView>
 </LinearLayout>
