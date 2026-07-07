@@ -32,7 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Px;
 //import androidx.cardview.R;
-import wallet.scr.wallet.java.androidx.cardview.R;
+import wallet.java.androidx.cardview.R;
 import wallet.R;
 
 /**
