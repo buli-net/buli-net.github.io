@@ -3,7 +3,13 @@ v11.04 mod by buli
 * -6/7/2026
 
 + Clone dependencies
-- File wallet/build.gradle // line 19
+- File wallet/build.gradle
++ // line 19
++ // line 14
+
+- implementation 'androidx.annotation:annotation:1.10.0'
+  - Create file wallet/src/wallet/java/external-annotations/androidx/annotation
+  - Create file wallet/src/wallet/java/androidx/annotation/.....[ 53 file in foder ]....
 
 - implementation 'androidx.cardview:cardview:1.0.0'
   - Crete file wallet/res/values/attrs.xml
