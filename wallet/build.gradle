@@ -1,13 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'androidsvgdrawable'
-
-    //clone btc
-
-        id 'com.google.protobuf' version '0.8.10'
-    ////
 }
-    
 
 configurations {
     all*.exclude group: 'androidx.viewpager', module: 'viewpager'
@@ -16,13 +10,7 @@ configurations {
 }
 
 dependencies {
-///clone btc
-          implementation 'org.bitcoinj:bitcoinj-bip70:0.16'
-    implementation 'com.google.protobuf:protobuf-java:3.25.3'
-    // implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'
-    implementation 'com.google.code.findbugs:jsr305:3.0.2'
-/////
+
  //   implementation 'androidx.annotation:annotation:1.10.0'
     implementation 'androidx.core:core:1.18.0'
     implementation 'androidx.activity:activity:1.13.0'
@@ -36,7 +24,7 @@ dependencies {
     implementation 'androidx.sqlite:sqlite:2.4.0'
     implementation "androidx.room:room-runtime:2.6.1"
     annotationProcessor "androidx.room:room-compiler:2.6.1"
-   // implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
+    implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
     implementation 'com.google.guava:guava:33.4.0-android'
     implementation 'com.google.zxing:core:3.5.4'
     //noinspection GradleDependency
@@ -49,14 +37,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
 
-
-////.colone btc
-
-repositories {
-    google()
-    mavenCentral()
-}
-/////
 android {
     compileSdkVersion 'android-34'
     buildToolsVersion '36.1.0'
@@ -101,14 +81,7 @@ android {
     sourceSets {
         main { // configured for testnet by default
             manifest.srcFile 'AndroidManifest.xml'
-           // java.srcDirs = ['src']
-  //clone btc
-            java.srcDirs = ['src', 'src/wallet/java']
-
-          proto.srcDirs = ['src/wallet/java/org/bitcoinj/wallet/proto']
-////////////
-
-            
+            java.srcDirs = ['src']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
@@ -134,10 +107,6 @@ android {
     lintOptions {
         abortOnError false
         disable 'MissingTranslation'
-        ///clone btc
-
-    warning 'UnknownNullness'
-        ////
     }
 
     packagingOptions {
@@ -182,18 +151,4 @@ task svgToPngMipmap(type: fr.avianey.androidsvgdrawable.gradle.SvgDrawableTask) 
     targetedDensities = ['xxhdpi', 'xxxhdpi']
     outputFormat = 'PNG'
     outputType = 'mipmap'
-}
-
-///clone btc
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.25.3"
-    }
-    generateProtoTasks {
-        all().each { task ->
-            task.builtins {
-                java {}
-            }
-        }
-    }
 }
