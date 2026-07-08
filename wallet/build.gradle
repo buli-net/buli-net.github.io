@@ -11,6 +11,13 @@ configurations {
 
 dependencies {
 
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'
+    implementation 'com.google.protobuf:protobuf-java:3.25.3'
+
+
+
+    
+
  //   implementation 'androidx.annotation:annotation:1.10.0'
     implementation 'androidx.core:core:1.18.0'
     implementation 'androidx.activity:activity:1.13.0'
