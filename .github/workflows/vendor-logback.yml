@@ -29,22 +29,31 @@ jobs:
           cp -r com ../wallet/src/wallet/java/
           cd .. && rm -rf android-mail-1.6.7-sources.jar temp_mail
 
-      - name: Clone javax.activation 1.2.0
+      - name: Strip activation + AWT + DB
         run: |
-          wget https://repo1.maven.org/maven2/com/sun/activation/javax.activation/1.2.0/javax.activation-1.2.0-sources.jar
-          mkdir -p temp_act
-          cd temp_act && unzip ../javax.activation-1.2.0-sources.jar
-          mkdir -p ../wallet/src/wallet/java/
-          cp -r javax ../wallet/src/wallet/java/
-          cd .. && rm -rf javax.activation-1.2.0-sources.jar temp_act
-
-      - name: Remove DBAppender
-        run: |
-          rm -f wallet/src/wallet/java/ch/qos/logback/classic/db/DBAppender.java
+          # Xoá nguyên javax.activation vì dùng java.awt
+          rm -rf wallet/src/wallet/java/javax/activation
+          
+          # Xoá mấy class trong javax.mail dính activation/AWT
+          rm -f wallet/src/wallet/java/javax/mail/internet/MimeUtility.java
+          rm -f wallet/src/wallet/java/javax/mail/internet/MimeBodyPart.java
+          rm -f wallet/src/wallet/java/javax/mail/internet/MimeMessage.java
+          rm -f wallet/src/wallet/java/javax/mail/internet/MimeMultipart.java
+          rm -f wallet/src/wallet/java/javax/mail/internet/MimePartDataSource.java
+          rm -f wallet/src/wallet/java/javax/mail/internet/PreencodedMimeBodyPart.java
+          rm -f wallet/src/wallet/java/javax/mail/internet/SharedInputStream.java
+          rm -f wallet/src/wallet/java/javax/mail/util/ByteArrayDataSource.java
+          rm -f wallet/src/wallet/java/javax/mail/Part.java
+          rm -f wallet/src/wallet/java/javax/mail/BodyPart.java
+          rm -f wallet/src/wallet/java/javax/mail/Multipart.java
+          rm -f wallet/src/wallet/java/javax/mail/MultipartDataSource.java
+          
+          # Xoá SQLiteAppender vì nó dùng db package
+          rm -f wallet/src/wallet/java/ch/qos/logback/classic/android/SQLiteAppender.java
           rm -rf wallet/src/wallet/java/ch/qos/logback/classic/db/
 
       - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Vendor logback-android 3.0.0 + android-mail + activation"
+          commit_message: "Vendor logback-android 3.0.0 + android-mail, strip activation/AWT"
           file_pattern: wallet/src/wallet/java/**
