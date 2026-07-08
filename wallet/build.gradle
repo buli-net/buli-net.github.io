@@ -1,6 +1,11 @@
 plugins {
     id 'com.android.application'
     id 'androidsvgdrawable'
+
+    //clone btc
+
+    id 'com.google.protobuf' version '0.9.4'
+    ////
 }
     
 
@@ -12,6 +17,7 @@ configurations {
 
 dependencies {
 ///clone btc
+        implementation 'com.google.protobuf:protobuf-java:3.25.3'
         implementation 'androidx.annotation:annotation:1.6.0'
     implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
@@ -166,3 +172,21 @@ task svgToPngMipmap(type: fr.avianey.androidsvgdrawable.gradle.SvgDrawableTask) 
     outputFormat = 'PNG'
     outputType = 'mipmap'
 }
+
+///clone btc
+
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.3"
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {}
+            }
+        }
+    }
+}
+
+
