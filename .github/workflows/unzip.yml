@@ -27,12 +27,12 @@ jobs:
             echo "Wrapper missing, creating..."
             wget -q https://services.gradle.org/distributions/gradle-7.6.1-bin.zip
             unzip -q gradle-7.6.1-bin.zip
-           ./gradle-7.6.1/bin/gradle wrapper --gradle-version 7.6.1 --distribution-type bin
+          ./gradle-7.6.1/bin/gradle wrapper --gradle-version 7.6.1 --distribution-type bin
           else
             echo "Wrapper exists"
           fi
           chmod +x gradlew
-         ./gradlew --version
+        ./gradlew --version
 
       - name: Unzip and move bitcoinj
         run: |
