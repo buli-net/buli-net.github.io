@@ -19,29 +19,48 @@ jobs:
         run: |
           cd wallet/src/wallet/java
           unzip bitcoinj-master.zip
-          mkdir -p org/bitcoinj
-          mv bitcoinj-master/base/src/main/java/org/bitcoinj/base org/bitcoinj/
-          mv bitcoinj-master/base/src/main/java/org/bitcoinj/base/exceptions org/bitcoinj/base/
-          mv bitcoinj-master/base/src/main/java/org/bitcoinj/base/internal org/bitcoinj/base/
-          mv bitcoinj-master/base/src/main/java/org/bitcoinj/base/utils org/bitcoinj/base/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/core org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/crypto org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/kits org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/net org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/params org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/script org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/signers org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/store org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/testing org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/uri org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/utils org/bitcoinj/
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj/wallet org/bitcoinj/
+          mkdir -p org/bitcoinj/base/exceptions
+          mkdir -p org/bitcoinj/base/internal
+          mkdir -p org/bitcoinj/base/utils
+          mkdir -p org/bitcoinj/core
+          mkdir -p org/bitcoinj/crypto
+          mkdir -p org/bitcoinj/kits
+          mkdir -p org/bitcoinj/net
+          mkdir -p org/bitcoinj/params
+          mkdir -p org/bitcoinj/script
+          mkdir -p org/bitcoinj/signers
+          mkdir -p org/bitcoinj/store
+          mkdir -p org/bitcoinj/testing
+          mkdir -p org/bitcoinj/uri
+          mkdir -p org/bitcoinj/utils
+          mkdir -p org/bitcoinj/wallet
+
+          # Copy base
+          cp bitcoinj-master/base/src/main/java/org/bitcoinj/base/*.java org/bitcoinj/base/
+          cp -r bitcoinj-master/base/src/main/java/org/bitcoinj/base/exceptions/* org/bitcoinj/base/exceptions/
+          cp -r bitcoinj-master/base/src/main/java/org/bitcoinj/base/internal/* org/bitcoinj/base/internal/
+          cp -r bitcoinj-master/base/src/main/java/org/bitcoinj/base/utils/* org/bitcoinj/base/utils/
+
+          # Copy core
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/core/* org/bitcoinj/core/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/crypto/* org/bitcoinj/crypto/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/kits/* org/bitcoinj/kits/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/net/* org/bitcoinj/net/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/params/* org/bitcoinj/params/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/script/* org/bitcoinj/script/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/signers/* org/bitcoinj/signers/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/store/* org/bitcoinj/store/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/testing/* org/bitcoinj/testing/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/uri/* org/bitcoinj/uri/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/utils/* org/bitcoinj/utils/
+          cp -r bitcoinj-master/core/src/main/java/org/bitcoinj/wallet/* org/bitcoinj/wallet/
+
           rm -rf bitcoinj-master.zip bitcoinj-master
 
       - name: Commit files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: Add full bitcoinj source base and core
+          commit_message: Add full bitcoinj source base + core
           file_pattern: wallet/src/wallet/java/org/
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
