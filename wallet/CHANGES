@@ -7,9 +7,17 @@ v11.04 mod by buli
 + // line 19
 + // line 14
 
+- implementation 'com.google.zxing:core:3.5.4'
+   - File wallet/build.gradle // line 30
+   - Create file wallet/src/wallet/java/com/google/zxing/ ..[all file & foder]....
+
+- implementation 'org.slf4j:slf4j-api:2.0.17'
+   - File wallet/build.gradle // line 36. add code line 10
+   - Create file wallet/src/wallet/java/org/slf4j/ ....[all file & foder]....
+
 - implementation 'androidx.annotation:annotation:1.10.0'
-  - Create file wallet/src/wallet/java/external-annotations/androidx/annotation
-  - Create file wallet/src/wallet/java/androidx/annotation/.....[ 53 file in foder ]....
+  - Create file wallet/src/wallet/java/external-annotations/androidx/annotation/annotations.xml
+  - Create file wallet/src/wallet/java/androidx/annotation/.....[ all file & foder ]....
 
 - implementation 'androidx.cardview:cardview:1.0.0'
   - Crete file wallet/res/values/attrs.xml
@@ -18,14 +26,8 @@ v11.04 mod by buli
   - Crete file wallet/res/values/styles_cardview.xml
   - Create file wallet/res/values-v23/styles_cardview.xml
 
-  - Create file wallet/src/wallet/java/androidx/cardview/widget/CardView.java
-  - Create file wallet/src/wallet/java/androidx/cardview/widget/CardViewApi17Impl.java
-  - Create file wallet/src/wallet/java/androidx/cardview/widget/CardViewApi21Impl.java
-  - Create file wallet/src/wallet/java/androidx/cardview/widget/CardViewBaseImpl.java
-  - Create file wallet/src/wallet/java/androidx/cardview/widget/CardViewDelegate.java
-  - Create file wallet/src/wallet/java/androidx/cardview/widget/CardViewImpl.java
-  - Create file wallet/src/wallet/java/androidx/cardview/widget/RoundRectDrawable.java
-  - Create file wallet/src/wallet/java/androidx/cardview/widget/RoundRectDrawableWithShadow.java
+  - Create file wallet/src/wallet/java/androidx/cardview/widget/....[all file]....
+  
 
 
 
