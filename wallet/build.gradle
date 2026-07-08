@@ -179,13 +179,11 @@ protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:3.25.3"
     }
-    generatedFilesBaseDir = "$projectDir/src"
+    generatedFilesBaseDir = "$projectDir/src/wallet/java"
     generateProtoTasks {
         all().each { task ->
             task.builtins {
-                java {
-                    outputSubDir = 'wallet/java'
-                }
+                java {}
             }
         }
     }
