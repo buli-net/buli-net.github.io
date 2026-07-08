@@ -19,22 +19,22 @@ jobs:
           cp -r logback-android-v_3.0.0/logback-android/src/main/java/ch wallet/src/wallet/java/
           rm -rf v_3.0.0.zip logback-android-v_3.0.0
 
-      - name: Clone android-mail 1.6.7 minimal
+      - name: Clone android-mail 1.6.7 SMTP only
         run: |
           wget https://repo1.maven.org/maven2/com/sun/mail/android-mail/1.6.7/android-mail-1.6.7-sources.jar
           mkdir -p temp_mail
           cd temp_mail && unzip ../android-mail-1.6.7-sources.jar
-          mkdir -p ../wallet/src/wallet/java/
-          # Chỉ copy smtp + util, bỏ pop3/imap/handlers
+          mkdir -p ../wallet/src/wallet/java/com/sun/mail/
+          # Chỉ lấy 4 package này, bỏ pop3/imap/handlers
           cp -r com/sun/mail/smtp ../wallet/src/wallet/java/com/sun/mail/
           cp -r com/sun/mail/util ../wallet/src/wallet/java/com/sun/mail/
           cp -r com/sun/mail/auth ../wallet/src/wallet/java/com/sun/mail/
           cp -r com/sun/mail/iap ../wallet/src/wallet/java/com/sun/mail/
           cd .. && rm -rf android-mail-1.6.7-sources.jar temp_mail
 
-      - name: Strip AWT + DB + javax
+      - name: Strip javax + DB + SQLiteAppender
         run: |
-          # Xoá toàn bộ javax vì SMTPAppender không cần
+          # Xoá toàn bộ javax vì không dùng
           rm -rf wallet/src/wallet/java/javax
           
           # Xoá SQLiteAppender + DB
