@@ -12,15 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Unzip + Cleanup
+      - name: Unzip
         run: |
           unzip -o junit.zip -d test/wallet/
           rm -f junit.zip
 
-      - name: Push changes
+      - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Unzip JUnit into test/wallet"
-          file_pattern: |
-            test/wallet/
-            junit.zip
+          commit_message: "Add JUnit source to test/wallet"
