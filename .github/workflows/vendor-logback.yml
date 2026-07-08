@@ -10,31 +10,31 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Clone logback-android 3.0.0
+
+      - name: Clone logback-android v_3.0.0
         run: |
-          wget https://github.com/tony19/logback-android/archive/refs/tags/3.0.0.zip
-          unzip 3.0.0.zip
+          wget https://github.com/tony19/logback-android/archive/refs/tags/v_3.0.0.zip
+          unzip v_3.0.0.zip
           cp -r logback-android-3.0.0/logback-android/src/main/java/ch wallet/src/wallet/java/
-          rm -rf 3.0.0.zip logback-android-3.0.0
-          
+          rm -rf v_3.0.0.zip logback-android-3.0.0
+
       - name: Clone android-mail 1.6.7
         run: |
           wget https://github.com/javaee/javamail/releases/download/JAVAMAIL-1_6_7/javax.mail-1.6.7-sources.jar
           mkdir -p temp_mail
-          cd temp_mail && unzip ../javax.mail-1.6.7-sources.jar
+          cd temp_mail && unzip../javax.mail-1.6.7-sources.jar
           cp -r javax wallet/src/wallet/java/
           cp -r com wallet/src/wallet/java/
-          cd .. && rm -rf javax.mail-1.6.7-sources.jar temp_mail
-          
+          cd.. && rm -rf javax.mail-1.6.7-sources.jar temp_mail
+
       - name: Clone android-activation 1.6.7
         run: |
           wget https://github.com/javaee/activation/releases/download/JAF-1_2_2/javax.activation-1.2.2-sources.jar
           mkdir -p temp_act
-          cd temp_act && unzip ../javax.activation-1.2.2-sources.jar
+          cd temp_act && unzip../javax.activation-1.2.2-sources.jar
           cp -r javax wallet/src/wallet/java/
           cp -r com wallet/src/wallet/java/
-          cd .. && rm -rf javax.activation-1.2.2-sources.jar temp_act
+          cd.. && rm -rf javax.activation-1.2.2-sources.jar temp_act
 
       - name: Remove DBAppender
         run: |
