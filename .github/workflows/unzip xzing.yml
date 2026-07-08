@@ -1,0 +1,30 @@
+name: Unzip ZXing
+
+on:
+  push:
+    paths:
+      - 'wallet/src/wallet/java/com.zip'
+  workflow_dispatch:
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Unzip com.zip
+        run: |
+          cd wallet/src/wallet/java
+          unzip -o com.zip
+          rm com.zip
+          
+      - name: Commit extracted files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add wallet/src/wallet/java/com/
+          git add -u wallet/src/wallet/java/com.zip
+          git commit -m "Auto unzip zxing core and remove zip" || echo "No changes to commit"
+          git push
