@@ -1,0 +1,336 @@
+/*
+ * Copyright 2014 Google Inc.
+ * Copyright 2014 Andreas Schildbach
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.bitcoinj.wallet;
+
+import com.google.common.base.MoreObjects;
+import org.bitcoinj.base.internal.TimeUtils;
+import org.bitcoinj.base.internal.InternalUtils;
+import org.bitcoinj.crypto.AesKey;
+import org.bitcoinj.crypto.EncryptableItem;
+import org.bitcoinj.crypto.EncryptedData;
+import org.bitcoinj.crypto.KeyCrypter;
+import org.bitcoinj.crypto.MnemonicCode;
+import org.bitcoinj.crypto.MnemonicException;
+
+import org.jspecify.annotations.Nullable;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.bitcoinj.base.internal.ByteUtils;
+
+import static org.bitcoinj.base.internal.Preconditions.checkArgument;
+import static org.bitcoinj.base.internal.Preconditions.checkState;
+
+/**
+ * Holds the seed bytes for the BIP32 deterministic wallet algorithm, inside a
+ * {@link DeterministicKeyChain}. The purpose of this wrapper is to simplify the encryption
+ * code.
+ */
+public class DeterministicSeed implements EncryptableItem {
+    // It would take more than 10^12 years to brute-force a 128 bit seed using $1B worth of computing equipment.
+    public static final int DEFAULT_SEED_ENTROPY_BITS = 128;
+    public static final int MAX_SEED_ENTROPY_BITS = 512;
+
+    private final byte @Nullable [] seed;
+    @Nullable private final List<String> mnemonicCode; // only one of mnemonicCode/encryptedMnemonicCode will be set
+    @Nullable private final EncryptedData encryptedMnemonicCode;
+    @Nullable private final EncryptedData encryptedSeed;
+    // Creation time of the seed, or null if the seed was deserialized from a version that did not have this field.
+    @Nullable private Instant creationTime = null;
+
+    /**
+     * Constructs a seed from a BIP 39 mnemonic code. See {@link MnemonicCode} for more
+     * details on this scheme.
+     * @param mnemonicCode list of words, space separated
+     * @param passphrase user supplied passphrase, or empty string if there is no passphrase
+     * @param creationTime when the seed was originally created
+     */
+    public static DeterministicSeed ofMnemonic(String mnemonicCode, String passphrase, Instant creationTime) {
+        return new DeterministicSeed(seedFromMnemonic(splitMnemonicCode(mnemonicCode), passphrase), splitMnemonicCode(mnemonicCode), Objects.requireNonNull(creationTime));
+    }
+
+    /**
+     * Constructs a seed from a BIP 39 mnemonic code. See {@link MnemonicCode} for more
+     * details on this scheme. Use this if you don't know the seed's creation time.
+     * @param mnemonicCode list of words, space separated
+     * @param passphrase user supplied passphrase, or empty string if there is no passphrase
+     */
+    public static DeterministicSeed ofMnemonic(String mnemonicCode, String passphrase) {
+        return new DeterministicSeed(seedFromMnemonic(splitMnemonicCode(mnemonicCode), passphrase), splitMnemonicCode(mnemonicCode), null);
+    }
+
+    /**
+     * Constructs a seed from a BIP 39 mnemonic code. See {@link MnemonicCode} for more
+     * details on this scheme.
+     * @param mnemonicCode list of words
+     * @param passphrase user supplied passphrase, or empty string if there is no passphrase
+     * @param creationTime when the seed was originally created
+     */
+    public static DeterministicSeed ofMnemonic(List<String> mnemonicCode, String passphrase, Instant creationTime) {
+        return new DeterministicSeed(seedFromMnemonic(mnemonicCode, passphrase), mnemonicCode, Objects.requireNonNull(creationTime));
+    }
+
+    /**
+     * Constructs a seed from a BIP 39 mnemonic code. See {@link MnemonicCode} for more
+     * details on this scheme. Use this if you don't know the seed's creation time.
+     * @param mnemonicCode list of words
+     * @param passphrase user supplied passphrase, or empty string if there is no passphrase
+     */
+    public static DeterministicSeed ofMnemonic(List<String> mnemonicCode, String passphrase) {
+        return new DeterministicSeed(seedFromMnemonic(mnemonicCode, passphrase), mnemonicCode, null);
+    }
+
+    /**
+     * Constructs a BIP 39 mnemonic code and a seed from a given entropy. See {@link MnemonicCode} for more
+     * details on this scheme.
+     * @param entropy entropy bits, length must be at least 128 bits and a multiple of 32 bits
+     * @param passphrase user supplied passphrase, or empty string if there is no passphrase
+     * @param creationTime when the seed was originally created
+     */
+    public static DeterministicSeed ofEntropy(byte[] entropy, String passphrase, Instant creationTime) {
+        return DeterministicSeed.ofEntropyInternal(entropy, passphrase, Objects.requireNonNull(creationTime));
+    }
+
+    /**
+     * Constructs a BIP 39 mnemonic code and a seed from a given entropy. See {@link MnemonicCode} for more
+     * details on this scheme. Use this if you don't know the seed's creation time.
+     * @param entropy entropy bits, length must be at least 128 bits and a multiple of 32 bits
+     * @param passphrase user supplied passphrase, or empty string if there is no passphrase
+     */
+    public static DeterministicSeed ofEntropy(byte[] entropy, String passphrase) {
+        return DeterministicSeed.ofEntropyInternal(entropy, passphrase, null);
+    }
+
+    private static DeterministicSeed ofEntropyInternal(byte[] entropy, String passphrase, @Nullable Instant creationTime) {
+        checkArgument(entropy.length * 8 >= DEFAULT_SEED_ENTROPY_BITS, () -> "entropy size too small");
+        Objects.requireNonNull(passphrase);
+        List<String> mnemonicCode = MnemonicCode.INSTANCE.toMnemonic(entropy);
+        byte[] seed = MnemonicCode.toSeed(mnemonicCode, passphrase);
+        return new DeterministicSeed(seed, mnemonicCode, creationTime);
+    }
+
+    /**
+     * Constructs a BIP 39 mnemonic code and a seed randomly. See {@link MnemonicCode} for more
+     * details on this scheme.
+     * @param random random source for the entropy
+     * @param bits number of bits of entropy, must be at least 128 bits and a multiple of 32 bits
+     * @param passphrase user supplied passphrase, or empty string if there is no passphrase
+     */
+    public static DeterministicSeed ofRandom(SecureRandom random, int bits, String passphrase) {
+        return DeterministicSeed.ofEntropyInternal(getEntropy(random, bits), Objects.requireNonNull(passphrase), TimeUtils.currentTime().truncatedTo(ChronoUnit.SECONDS));
+    }
+
+    // For use in DeteministicKeyChain.fromProtobuf() only
+    static DeterministicSeed fromProtobuf(String mnemonicString, byte @Nullable [] seed, String passphrase, @Nullable Instant creationTime) {
+        return new DeterministicSeed(optionalSeedFromMnemonic(splitMnemonicCode(mnemonicString), passphrase, seed), splitMnemonicCode(mnemonicString), creationTime);
+    }
+
+    // For use in DeteministicKeyChain.fromProtobuf() only
+    static DeterministicSeed fromProtobufEncrypted(EncryptedData encryptedMnemonic, @Nullable EncryptedData encryptedSeed, @Nullable Instant creationTime) {
+        return new DeterministicSeed(encryptedMnemonic, encryptedSeed, creationTime);
+    }
+
+    // Canonical constructor: both seed and mnemonic sentence are present
+    private DeterministicSeed(byte[] seed, List<String> mnemonic, @Nullable Instant creationTime) {
+        this.seed = Objects.requireNonNull(seed);
+        this.mnemonicCode = Objects.requireNonNull(mnemonic);
+        this.encryptedMnemonicCode = null;
+        this.encryptedSeed = null;
+        this.creationTime = creationTime;
+    }
+
+    // Canonical constructor: encrypted mnemonic sentence and optional encrypted seed
+    private DeterministicSeed(EncryptedData encryptedMnemonic, @Nullable EncryptedData encryptedSeed, @Nullable Instant creationTime) {
+        this.seed = null;
+        this.mnemonicCode = null;
+        this.encryptedMnemonicCode = Objects.requireNonNull(encryptedMnemonic);
+        this.encryptedSeed = encryptedSeed;
+        this.creationTime = creationTime;
+    }
+
+    // If seed is null, generate seed from mnemonic and passphrase. Otherwise, return unmodified seed.
+    private static byte[] optionalSeedFromMnemonic(List<String> mnemonicCode, String passphrase, byte @Nullable [] seed) {
+        return seed != null ? seed : seedFromMnemonic(mnemonicCode, passphrase);
+    }
+
+    private static byte[] seedFromMnemonic(List<String> mnemonicCode, String passphrase) {
+        return MnemonicCode.toSeed(mnemonicCode, Objects.requireNonNull(passphrase));
+    }
+
+    private static byte[] getEntropy(SecureRandom random, int bits) {
+        checkArgument(bits <= MAX_SEED_ENTROPY_BITS, () ->
+                "requested entropy size too large");
+
+        byte[] seed = new byte[bits / 8];
+        random.nextBytes(seed);
+        return seed;
+    }
+
+    @Override
+    public boolean isEncrypted() {
+        checkState(mnemonicCode != null || encryptedMnemonicCode != null);
+        return encryptedMnemonicCode != null;
+    }
+
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    public String toString(boolean includePrivate) {
+        MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper(this).omitNullValues();
+        if (isEncrypted())
+            helper.addValue("encrypted");
+        else if (includePrivate)
+            helper.addValue(toHexString()).add("mnemonicCode", getMnemonicString());
+        else
+            helper.addValue("unencrypted");
+        return helper.toString();
+    }
+
+    /** Returns the seed as hex or null if encrypted. */
+    @Nullable
+    public String toHexString() {
+        return seed != null ? ByteUtils.formatHex(seed) : null;
+    }
+
+    @Override
+    public byte @Nullable [] getSecretBytes() {
+        return getMnemonicAsBytes();
+    }
+
+    public byte @Nullable [] getSeedBytes() {
+        return seed;
+    }
+
+    @Nullable
+    @Override
+    public EncryptedData getEncryptedData() {
+        return encryptedMnemonicCode;
+    }
+
+    @Override
+    public KeyCrypter.EncryptionType getEncryptionType() {
+        return KeyCrypter.EncryptionType.ENCRYPTED_SCRYPT_AES;
+    }
+
+    @Nullable
+    public EncryptedData getEncryptedSeedData() {
+        return encryptedSeed;
+    }
+
+    @Override
+    public Optional<Instant> getCreationTime() {
+        return Optional.ofNullable(creationTime);
+    }
+
+    /**
+     * Sets the creation time of this seed.
+     * @param creationTime creation time of this seed
+     */
+    public void setCreationTime(Instant creationTime) {
+        this.creationTime = Objects.requireNonNull(creationTime);
+    }
+
+    /**
+     * Clears the creation time of this seed. This is mainly used deserialization and cloning. Normally you should not
+     * need to use this, as keys should have proper creation times whenever possible.
+     */
+    public void clearCreationTime() {
+        this.creationTime = null;
+    }
+
+    public DeterministicSeed encrypt(KeyCrypter keyCrypter, AesKey aesKey) {
+        checkState(encryptedMnemonicCode == null, () ->
+                "trying to encrypt seed twice");
+        checkState(mnemonicCode != null, () ->
+                "mnemonic missing so cannot encrypt");
+        EncryptedData encryptedMnemonic = keyCrypter.encrypt(getMnemonicAsBytes(), aesKey);
+        EncryptedData encryptedSeed = keyCrypter.encrypt(seed, aesKey);
+        return new DeterministicSeed(encryptedMnemonic, encryptedSeed, creationTime);
+    }
+
+    private byte[] getMnemonicAsBytes() {
+        return getMnemonicString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public DeterministicSeed decrypt(KeyCrypter crypter, String passphrase, AesKey aesKey) {
+        checkState(isEncrypted());
+        Objects.requireNonNull(encryptedMnemonicCode);
+        List<String> mnemonic = decodeMnemonicCode(crypter.decrypt(encryptedMnemonicCode, aesKey));
+        byte[] seed = encryptedSeed == null ? null : crypter.decrypt(encryptedSeed, aesKey);
+        return new DeterministicSeed(optionalSeedFromMnemonic(mnemonic, passphrase, seed), mnemonic, creationTime);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DeterministicSeed other = (DeterministicSeed) o;
+        return Objects.equals(creationTime, other.creationTime)
+            && Objects.equals(encryptedMnemonicCode, other.encryptedMnemonicCode)
+            && Objects.equals(mnemonicCode, other.mnemonicCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(creationTime, encryptedMnemonicCode, mnemonicCode);
+    }
+
+    /**
+     * Check if our mnemonic is a valid mnemonic phrase for our word list.
+     * Does nothing if we are encrypted.
+     *
+     * @throws org.bitcoinj.crypto.MnemonicException if check fails
+     */
+    public void check() throws MnemonicException {
+        if (mnemonicCode != null)
+            MnemonicCode.INSTANCE.check(mnemonicCode);
+    }
+
+    byte[] getEntropyBytes() throws MnemonicException {
+        return MnemonicCode.INSTANCE.toEntropy(mnemonicCode);
+    }
+
+    /** Get the mnemonic code, or null if unknown. */
+    @Nullable
+    public List<String> getMnemonicCode() {
+        return mnemonicCode;
+    }
+
+    /** Get the mnemonic code as string, or null if unknown. */
+    @Nullable
+    public String getMnemonicString() {
+        return mnemonicCode != null ? InternalUtils.SPACE_JOINER.join(mnemonicCode) : null;
+    }
+
+    // decode to String from byte[]
+    private static List<String> decodeMnemonicCode(byte[] mnemonicCode) {
+        return splitMnemonicCode(new String(mnemonicCode, StandardCharsets.UTF_8));
+    }
+
+    // Split mnemonic code into List<String>
+    private static List<String> splitMnemonicCode(String mnemonicCode) {
+        return InternalUtils.WHITESPACE_SPLITTER.splitToList(mnemonicCode);
+    }
+}
