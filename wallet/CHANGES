@@ -55,7 +55,7 @@ v11.04 mod by buli
 - Create file wallet/res/layout/paper_wallet_print.xml
 - Create file wallet/res/layout/activity_paper_wallet.xml
 - Create file wallet/src/wallet/ui/PaperWalletActivity.java
-- Create file wallet/src/wallet/util/PrintHelper.java
+- Create file wallet/src/wallet/java/androidx/print/PrintHelper.java
 - Create file wallet/src/wallet/util/Bip38Helper.java
 
 - Add code file wallet/res/xml/file_provider.xml [ add code line 9-->13 ]
