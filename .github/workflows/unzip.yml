@@ -1,16 +1,19 @@
-name: Unzip
-on: push
+name: Unzip bitcoinj
+on: workflow_dispatch
 jobs:
   unzip:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, '[unzip]')
     steps:
       - uses: actions/checkout@v4
-      - run: |
+      
+      - name: Unzip and move
+        run: |
           cd wallet/src/wallet/java
           unzip bitcoinj-master.zip
-          mv bitcoinj-master/core/src/main/java/org/bitcoinj./org/
+          mv bitcoinj-master/core/src/main/java/org/bitcoinj ./org/
           rm -rf bitcoinj-master.zip bitcoinj-master
-      - uses: stefanzweifel/git-auto-commit-action@v5
+          
+      - name: Commit
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: Unzipped bitcoinj
+          commit_message: Add bitcoinj source
