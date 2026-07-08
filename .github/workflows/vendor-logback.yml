@@ -20,21 +20,20 @@ jobs:
 
       - name: Clone android-mail 1.6.7
         run: |
-          wget https://github.com/javaee/javamail/releases/download/JAVAMAIL-1_6_7/javax.mail-1.6.7-sources.jar
+          wget https://repo1.maven.org/maven2/com/sun/mail/android-mail/1.6.7/android-mail-1.6.7-sources.jar
           mkdir -p temp_mail
-          cd temp_mail && unzip ../javax.mail-1.6.7-sources.jar
+          cd temp_mail && unzip../android-mail-1.6.7-sources.jar
           cp -r javax wallet/src/wallet/java/
           cp -r com wallet/src/wallet/java/
-          cd .. && rm -rf javax.mail-1.6.7-sources.jar temp_mail
+          cd.. && rm -rf android-mail-1.6.7-sources.jar temp_mail
 
-      - name: Clone android-activation 1.6.7
+      - name: Clone javax.activation 1.2.0
         run: |
-          wget https://github.com/javaee/activation/releases/download/JAF-1_2_2/javax.activation-1.2.2-sources.jar
+          wget https://repo1.maven.org/maven2/com/sun/activation/javax.activation/1.2.0/javax.activation-1.2.0-sources.jar
           mkdir -p temp_act
-          cd temp_act && unzip ../javax.activation-1.2.2-sources.jar
+          cd temp_act && unzip../javax.activation-1.2.0-sources.jar
           cp -r javax wallet/src/wallet/java/
-          cp -r com wallet/src/wallet/java/
-          cd .. && rm -rf javax.activation-1.2.2-sources.jar temp_act
+          cd.. && rm -rf javax.activation-1.2.0-sources.jar temp_act
 
       - name: Remove DBAppender
         run: |
