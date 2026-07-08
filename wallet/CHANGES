@@ -1,5 +1,7 @@
 v11.04 mod by buli
 
+
+=====================================================================
 * -6/7/2026
 
 + Clone dependencies
@@ -26,9 +28,7 @@ v11.04 mod by buli
   - Create file wallet/res/values-v23/styles_cardview.xml
   - Create file wallet/src/wallet/java/androidx/cardview/widget/....[all file]....
   
-
-
-
+----------------------------------------------------------------------------------------
 
 + Active layout hide at file wallet/res/values/layouts.xml
 
@@ -37,8 +37,8 @@ v11.04 mod by buli
     - show_wallet_address_dialog_hint edit false > true
     - address_book_two_panes edit false > true
     - network_monitor_two_panes edit false > true
-    
 
+=====================================================================
 
 * - 5/7/2026
 + Update language pack
@@ -48,6 +48,7 @@ v11.04 mod by buli
 ~ wallet/res/values-fr/strings.xml
 ~ wallet/res/values-zh/strings.xml
 
+=====================================================================
 
 * - 2/7/2026
 + Add Create paper wallet
@@ -63,6 +64,8 @@ v11.04 mod by buli
 - Add code file wallet/res/values/strings.xml [add code line 383 --> 446]
 - Add code file wallet/src/wallet/ui/WalletActivity.java [ add code line 460--> 465]
 - Add code file wallet/res/menu/wallet_options.xml [add code line 71-->76]
+
+=====================================================================
 
 * - 29/06/2026
 
