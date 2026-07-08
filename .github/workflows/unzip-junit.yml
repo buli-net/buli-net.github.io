@@ -1,0 +1,26 @@
+name: Unzip JUnit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unzip + Cleanup
+        run: |
+          unzip -o junit.zip -d test/wallet/
+          rm -f junit.zip
+
+      - name: Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Unzip JUnit into test/wallet"
+          file_pattern: |
+            test/wallet/
+            junit.zip
